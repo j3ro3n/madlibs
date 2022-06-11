@@ -3,13 +3,9 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "Madlibs": {
+    "MadderLibs": {
       "projectType": "application",
-      "schematics": {
-        "@schematics/angular:application": {
-          "strict": true
-        }
-      },
+      "schematics": {},
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -17,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/madlibs",
+            "outputPath": "dist/madder-libs",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -68,10 +64,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "Madlibs:build:production"
+              "browserTarget": "MadderLibs:build:production"
             },
             "development": {
-              "browserTarget": "Madlibs:build:development"
+              "browserTarget": "MadderLibs:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -79,7 +75,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "Madlibs:build"
+            "browserTarget": "MadderLibs:build"
           }
         },
         "test": {
@@ -101,6 +97,5 @@
         }
       }
     }
-  },
-  "defaultProject": "Madlibs"
+  }
 }
