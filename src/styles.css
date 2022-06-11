@@ -1,1 +1,40 @@
 /* You can add global styles to this file, and also import other style files */
+@import "~@angular/material/prebuilt-themes/pink-bluegrey.css";
+
+/* Margins for different screens. */
+@media all and (min-width: 1008px) {
+    body {
+        margin-left: 20%;
+        margin-right: 20%;
+    }
+}
+
+@media all and (min-width: 641px) and (max-width: 1007px) {
+    body {
+        margin-left: 10%;
+        margin-right: 10%;
+    }
+}
+
+@media all and (max-width: 640px) {
+    body {
+        margin-left: 1%;
+        margin-right: 1%;
+    }
+}
+
+/* Common css rules */
+html, body { 
+    height: 100%;
+    background-color: #cccccc;
+}
+
+body { 
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    text-align: center;
+}
+
+/* Specific css classes */
+.loginInput {
+    min-width: 100%;
+}

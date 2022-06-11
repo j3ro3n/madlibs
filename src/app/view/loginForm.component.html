@@ -1,0 +1,26 @@
+<mat-card>
+    <mat-card-title>The story begins...</mat-card-title>
+    <mat-card-subtitle>But first...</mat-card-subtitle>
+    <mat-card-content>
+        <p>
+            <mat-form-field hintLabel="Max 10 characters" appearance="fill" class="loginInput">
+                <mat-label>Enter a nickname you are known by</mat-label>
+                <input matInput #input maxlength="15" placeholder="Ex. Postman Pat">
+                <mat-hint align="end">{{input.value?.length || 0}}/15</mat-hint>
+            </mat-form-field>
+        </p>
+        <p>
+            <mat-form-field appearance="fill" class="loginInput">
+                <mat-label>Enter a session idea if you're playing with friends</mat-label>
+                <input matInput #input maxlength="10">
+                <mat-hint>Feel free to leave this blank to start a new session.</mat-hint>
+            </mat-form-field>
+        </p>
+    </mat-card-content>
+    <mat-card-actions>
+        <button mat-raised-button color="primary">Let's get started</button>
+    </mat-card-actions>
+    <mat-card-footer>
+        <sub>Project conceived of and created by the Madder Libs team, Avans University of Applied Science, 2022.</sub>
+    </mat-card-footer>
+</mat-card>
