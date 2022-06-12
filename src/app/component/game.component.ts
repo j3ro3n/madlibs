@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { StoreService } from '../service/localStore.services';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { MatIconRegistry } from '@angular/material/icon';
 
 @Component({
   selector: 'game',
@@ -18,8 +20,10 @@ export class GameComponent {
 
   constructor(
     private store : StoreService, 
-    private router : Router
+    private router : Router,
+    private snackBar: MatSnackBar
   ) {
+    // Grab data from the form.
     this.formData = store.getGameState();
 
     // For quick testing, if left empty, fill with junk values.
@@ -101,6 +105,7 @@ export class GameComponent {
           this.setTimeBar();
         } else {
           this.endTimer();
+          let snackBarRef = this.snackBar.open("Timer ran out!", 'Wahey!', { duration: 5000 });
         }
       }, 1000)
     } else {
