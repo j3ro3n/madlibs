@@ -1,0 +1,45 @@
+<p>
+    <mat-toolbar color="primary">
+        <span>Madder Libs</span>
+    </mat-toolbar>
+</p>
+
+<p>
+    <mat-card>
+        <div class="row">
+            <div class="col-3"><mat-progress-bar mode="determinate" value="{{timePercent}}"></mat-progress-bar></div>
+            <div class="col-6"></div>
+            <div class="col-3">
+                <button mat-stroked-button style="margin-right:5px" (click)="onQuit()">Quit</button>
+                <button mat-flat-button disabled><span style="color:white; align-items: center; font-size: x-large;">{{formData.sessieid}}</span></button>
+            </div>
+        </div>
+        <hr/>
+        <div class="row">
+            <div class="col-12">Click the options below to select a set of answers to be added to your mad lib. Before each list of options you will see the category to which they belong. Once you're done, simply click on the create button!</div>
+        </div>
+        <hr/>
+        <div class="row">
+            <div class="col-1">
+                <div *ngFor="let key of formDataKeys"><p><span matBadge="{{formData[key.score] || ''}}" matBadgePosition="before" matBadgeOverlap="false">{{formData[key.name] || ''}}</span></p></div>
+            </div>
+            <div class="col-10">
+                <div class="row">
+                    <div class="col-2">CATEGORY</div>
+                    <div class="col-2">WORD1</div>
+                    <div class="col-2">WORD2</div>
+                    <div class="col-2">WORD3</div>
+                    <div class="col-2">WORD4</div>
+                    <div class="col-2">FREE INPUT</div>
+                </div>
+            </div>
+            <div class="col-1">
+                SHUFFLE AND REPORT
+            </div>
+        </div>
+        <hr/>
+        <div class="row">
+            <div class="col-12">CREATE BUTTON</div>
+        </div>
+</mat-card>
+</p>
