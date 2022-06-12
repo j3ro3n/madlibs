@@ -18,6 +18,8 @@ export class GameComponent {
   timePercent = 100;
   interval: any;
 
+  endButtonText: string;
+
   constructor(
     private store : StoreService, 
     private router : Router,
@@ -91,6 +93,9 @@ export class GameComponent {
           "score": score
         });
     });
+
+    // Generate a random fun text for the end button.
+    this.endButtonText = this.generateButtonText();
   }
 
   ngOnInit() {
@@ -105,7 +110,7 @@ export class GameComponent {
           this.setTimeBar();
         } else {
           this.endTimer();
-          let snackBarRef = this.snackBar.open("Timer ran out!", 'Wahey!', { duration: 5000 });
+          let snackBarRef = this.snackBar.open("Timer ran out!", 'Test!', { duration: 5000 });
         }
       }, 1000)
     } else {
@@ -119,6 +124,30 @@ export class GameComponent {
 
   endTimer() {
     clearInterval(this.interval);
+  }
+
+  generateButtonText() : string {
+    let endButtonTexts = [];
+    endButtonTexts.push( "Create your Mad Lib!" );
+    endButtonTexts.push( "For pony!" );
+    endButtonTexts.push( "Push it. Push it real good!" );
+    endButtonTexts.push( "Today is a good day!" );
+    endButtonTexts.push( "For glory!" );
+    endButtonTexts.push( "Press it. You know you want to." );
+
+    let randomNumber = Math.floor( Math.random() * endButtonTexts.length );
+
+    return endButtonTexts[randomNumber];
+  }
+
+  onReport() {
+    // TODO: WRITE REPORT FUNCTIONALITY
+    let snackBarRef = this.snackBar.open("Going into report mode!", 'Test!', { duration: 5000 });
+  }
+
+  onRefresh() {
+    // TODO: WRITE REFRESH FUNCTIONALITY
+    let snackBarRef = this.snackBar.open("Refreshing options!", 'Test!', { duration: 5000 });
   }
 
   onQuit() {

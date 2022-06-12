@@ -37,6 +37,7 @@
                 <div *ngFor="let key of formDataKeys"><p><span matBadge="{{formData[key.score] || ''}}" matBadgePosition="before" matBadgeOverlap="false">{{formData[key.name] || ''}}</span></p></div>
             </div>
             <div class="col-10">
+                <!-- TODO: *ngFor this row to show all options in the json -->
                 <div class="row">
                     <div class="col-2">CATEGORY</div>
                     <div class="col-2">WORD1</div>
@@ -47,10 +48,10 @@
                 </div>
             </div>
             <div class="col-1">
-                <p><button mat-mini-fab color="accent">
+                <p><button mat-mini-fab color="accent" title="Shuffle" (click)="onRefresh()">
                     <span class="material-icons">cached</span>
                 </button></p>
-                <p><button mat-mini-fab color="accent">
+                <p><button mat-mini-fab color="accent" title="Report" (click)="onReport()">
                     <span class="material-icons">sms_failed</span>
                 </button></p>
             </div>
@@ -58,7 +59,7 @@
         <hr/>
         <div class="row">
             <div class="col-12">
-                <button mat-raised-button color="primary" class="w-100">Create</button>
+                <button mat-raised-button color="primary" class="w-100">{{endButtonText}}</button>
             </div>
         </div>
 </mat-card>
