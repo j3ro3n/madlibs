@@ -24,10 +24,11 @@ stages:
     - script: |
         npm install -g @angular/cli
         npm install
-        ng build --prod
+        ng build
       displayName: 'npm install, build and test'
     - task: AzureStaticWebApp@0
       inputs:
           app_location: "/" 
+          output_location: "dist/madder-libs"
       env:
           azure_static_web_apps_api_token: $(deployment_token)
