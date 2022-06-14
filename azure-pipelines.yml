@@ -6,20 +6,6 @@
 trigger:
 - master
 
-variables:
-
-  # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: 'b671b5c9-67cc-4ff2-9b95-45769c66027d'
-
-  # Web app name
-  webAppName: 'madderlibs'
-
-  # Environment name
-  environmentName: 'madderlibs'
-
-  # Agent VM image name
-  vmImageName: 'ubuntu-latest'
-
 stages:
 - stage: Build
   displayName: Build stage
@@ -27,7 +13,7 @@ stages:
   - job: Build
     displayName: Build
     pool:
-      vmImage: $(vmImageName)
+      vmImage: ubuntu-latest
 
     steps:
     - task: NodeTool@0
@@ -36,42 +22,13 @@ stages:
       displayName: 'Install Node.js'
 
     - script: |
+        npm install -g @angular/cli
         npm install
-        npm run build --if-present
+        ng build --prod
       displayName: 'npm install, build and test'
-
-    - task: ArchiveFiles@2
-      displayName: 'Archive files'
+    - task: AzureStaticWebApp@0
       inputs:
-        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
-        includeRootFolder: false
-        archiveType: zip
-        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-        replaceExistingArchive: true
-
-    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-      artifact: drop
-
-- stage: Deploy
-  displayName: Deploy stage
-  dependsOn: Build
-  condition: succeeded()
-  jobs:
-  - deployment: Deploy
-    displayName: Deploy
-    environment: $(environmentName)
-    pool:
-      vmImage: $(vmImageName)
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureWebApp@1
-            displayName: 'Azure Web App Deploy: madderlibs'
-            inputs:
-              azureSubscription: $(azureSubscription)
-              appType: webAppLinux
-              appName: $(webAppName)
-              runtimeStack: 'NODE|16.15'
-              package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-              startUpCommand: 'npm run start'
+          app_location: "/" 
+          output_location: "dist"
+      env:
+          azure_static_web_apps_api_token: $(deployment_token)
