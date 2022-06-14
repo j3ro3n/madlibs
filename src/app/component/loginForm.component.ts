@@ -11,6 +11,7 @@ import { StoreService } from '../service/localStore.services';
 })
 export class LoginFormComponent {
   loginForm: FormGroup;
+  footer_message: string;
   
   constructor(private snackBar: MatSnackBar, 
       private api: ApiService,
@@ -18,6 +19,7 @@ export class LoginFormComponent {
       private router: Router
     ) {
     this.loginForm = new FormGroup({});
+    this.footer_message = store.MAD_LIBS_FOOTER;
   }
 
   ngOnInit() : void {
