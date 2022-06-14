@@ -20,6 +20,7 @@ export class GameComponent {
   interval: any;
 
   endButtonText: string;
+  footer_message: string;
 
   constructor(
     private api : ApiService,
@@ -81,8 +82,9 @@ export class GameComponent {
     this.updatePlayerList();
     this.madLibData = [];
 
-    // Generate a random fun text for the end button.
+    // Get text for display.
     this.endButtonText = this.generateButtonText();
+    this.footer_message = store.MAD_LIBS_FOOTER;
   }
 
   async ngOnInit() {
