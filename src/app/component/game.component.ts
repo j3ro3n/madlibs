@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { StoreService } from '../service/localStore.services';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { MatIconRegistry } from '@angular/material/icon';
+import { ApiService } from '../service/api.services';
 
 @Component({
   selector: 'game',
@@ -11,7 +11,8 @@ import { MatIconRegistry } from '@angular/material/icon';
 export class GameComponent {
   formData : any;
   formDataKeys : any[];
-  formDataTemp : string[];
+  madLibData : any[];
+  madLibDataFull : any;
 
   timeMax = 60;
   timeToGo = this.timeMax;
@@ -21,7 +22,8 @@ export class GameComponent {
   endButtonText: string;
 
   constructor(
-    private store : StoreService, 
+    private api : ApiService,
+    private store : StoreService,
     private router : Router,
     private snackBar: MatSnackBar
   ) {
@@ -75,30 +77,24 @@ export class GameComponent {
     }
 
     // Convert the array given to properties that can be queried in the template.
-    this.formDataTemp = Object.keys(this.formData).filter(prop => {
-      return prop !== "sessieid" && prop.indexOf("score") < 0
-    });
     this.formDataKeys = [];
-    this.formDataTemp.forEach(item => {
-      let name = item.indexOf("_name") > 0 
-        ? item.substring(0, item.length-5).concat("_name") 
-        : item;
-      let score = item.indexOf("_name") > 0
-        ? item.substring(0, item.length-5).concat("_score")
-        : item.concat("_score");
-      
-      this.formDataKeys.push(
-        { 
-          "name": name,
-          "score": score
-        });
-    });
+    this.updatePlayerList();
+    this.madLibData = [];
 
     // Generate a random fun text for the end button.
     this.endButtonText = this.generateButtonText();
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    let sessionID = this.formData.sessieid;
+    await this.api.postMadLib({
+      sessieid: sessionID,
+      request: "mad lib"
+    }).then((result) => {
+      this.store.setGameMadLib(result);
+    });
+    this.convertMadLibData(this.store.getGameMadLib());
+    this.madLibDataFull = this.store.getGameMadLib();
     this.startCountdown();
   }
 
@@ -139,6 +135,10 @@ export class GameComponent {
 
     return endButtonTexts[randomNumber];
   }
+  
+  quit() {
+    this.router.navigate([ '' ]);
+  }
 
   onReport() {
     // TODO: WRITE REPORT FUNCTIONALITY
@@ -150,7 +150,44 @@ export class GameComponent {
     let snackBarRef = this.snackBar.open("Refreshing options!", 'Test!', { duration: 5000 });
   }
 
-  onQuit() {
-    this.router.navigate([ '' ]);
+  convertMadLibData(convMadLibData : any) {
+    let madLibDataTemp = Object.keys(convMadLibData).filter(prop => {
+      return prop !== "mad lib";
+    });
+    madLibDataTemp.forEach(item => {
+      let context = convMadLibData[item];
+      let word1 = item + "_1";
+      let word2 = item + "_2";
+      let word3 = item + "_3";
+      let word4 = item + "_4";
+
+      this.madLibData.push({
+        key: item,
+        word1: context[word1],
+        word2: context[word2],
+        word3: context[word3],
+        word4: context[word4]
+      });
+    })
+  }
+
+  updatePlayerList() {
+    let formDataTemp = Object.keys(this.formData).filter(prop => {
+      return prop !== "sessieid" && prop.indexOf("score") < 0
+    });
+    formDataTemp.forEach(item => {
+      let name = item.indexOf("_name") > 0 
+        ? item.substring(0, item.length-5).concat("_name") 
+        : item;
+      let score = item.indexOf("_name") > 0
+        ? item.substring(0, item.length-5).concat("_score")
+        : item.concat("_score");
+      
+      this.formDataKeys.push(
+        { 
+          "name": name,
+          "score": score
+        });
+    });
   }
 }

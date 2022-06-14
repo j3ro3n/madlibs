@@ -3,6 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ApiService } from '../service/api.services';
 import { Router } from '@angular/router';
+import { StoreService } from '../service/localStore.services';
 
 @Component({
   selector: 'loginForm',
@@ -13,6 +14,7 @@ export class LoginFormComponent {
   
   constructor(private snackBar: MatSnackBar, 
       private api: ApiService,
+      private store: StoreService,
       private router: Router
     ) {
     this.loginForm = new FormGroup({});
@@ -30,7 +32,9 @@ export class LoginFormComponent {
   async onPlay() {
     if (this.loginForm.valid) {
       try {
-        await this.api.postLogin(this.loginForm);
+        await this.api.postLogin(this.loginForm.value).then((result) => {
+          this.store.setGameState(result);
+        });
         this.router.navigate(['game']);
       } catch(exception) {
         let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });

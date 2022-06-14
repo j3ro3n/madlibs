@@ -11,7 +11,7 @@
                 <span class="material-icons">timer</span><mat-progress-bar mode="determinate" value="{{timePercent}}"></mat-progress-bar>
             </div>
             <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                <button mat-stroked-button style="margin-right:5px" (click)="onQuit()">Quit</button>
+                <button mat-stroked-button style="margin-right:5px" (click)="quit()">Quit</button>
                 <button mat-flat-button disabled><span style="color:white; align-items: center; font-size: x-large;">{{formData.sessieid}}</span></button>
             </div>
         </div>
@@ -33,18 +33,35 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-1">
-                <div *ngFor="let key of formDataKeys"><p><span matBadge="{{formData[key.score] || ''}}" matBadgePosition="before" matBadgeOverlap="false">{{formData[key.name] || ''}}</span></p></div>
+            <div class="col-sm-12 col-md-12 col-lg-1 col-xl-1">
+                <div *ngFor="let key of formDataKeys" class="pt-2"><p><span matBadge="{{formData[key.score] || ''}}" matBadgePosition="before" matBadgeOverlap="false">{{formData[key.name] || ''}}</span></p></div>
             </div>
-            <div class="col-10">
-                <!-- TODO: *ngFor this row to show all options in the json -->
-                <div class="row">
-                    <div class="col-2">CATEGORY</div>
-                    <div class="col-2">WORD1</div>
-                    <div class="col-2">WORD2</div>
-                    <div class="col-2">WORD3</div>
-                    <div class="col-2">WORD4</div>
-                    <div class="col-2">FREE INPUT</div>
+            <div class="col-sm-12 col-md-12 col-lg-10 col-xl-10">
+                <div class="row" *ngFor="let key of madLibData; index as i">
+                    <div class="col-sm-12 col-md-12 col-lg-2 col-xl-2 pt-2 pb-1"><mat-chip-list><mat-chip class="w-100" selected color="accent">{{madLibData[i].key |titlecase}}</mat-chip></mat-chip-list></div>
+                    <div class="col-sm-12 col-md-12 col-lg-10 col-xl-10">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12 col-lg-9 col-xl-9">
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 pb-3 pt-2 button-row">
+                                        <button class="w-50" mat-raised-button>{{madLibData[i].word1 |titlecase}}</button>
+                                        <button class="w-50" mat-raised-button>{{madLibData[i].word2 |titlecase}}</button>
+                                    </div>
+                                    <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 pb-3 pt-2 button-row">
+                                        <button class="w-50" mat-raised-button>{{madLibData[i].word3 |titlecase}}</button>
+                                        <button class="w-50" mat-raised-button>{{madLibData[i].word4 |titlecase}}</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-12 col-lg-3 col-xl-3">
+                                <mat-form-field appearance="fill" class="loginInput" class="pb-1 w-100">
+                                    <mat-label>Enter your own mad lib...</mat-label>
+                                    <input matInput #input maxlength="17">
+                                    <mat-hint align="end">{{input.value?.length || 0}}/17</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-1">

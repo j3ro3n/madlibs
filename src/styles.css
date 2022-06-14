@@ -6,15 +6,15 @@
 /* Margins for different screens. */
 @media all and (min-width: 1008px) {
     body {
-        margin-left: 20%;
-        margin-right: 20%;
+        margin-left: 10%;
+        margin-right: 10%;
     }
 }
 
 @media all and (min-width: 641px) and (max-width: 1007px) {
     body {
-        margin-left: 10%;
-        margin-right: 10%;
+        margin-left: 5%;
+        margin-right: 5%;
     }
 }
 
@@ -36,7 +36,17 @@ body {
     text-align: center;
 }
 
+button {
+    white-space: pre-wrap;
+}
+
 /* Specific css classes */
 .loginInput {
     min-width: 100%;
+}
+
+.button-row {
+    padding:0;
+    margin:0;
+    float: left;
 }

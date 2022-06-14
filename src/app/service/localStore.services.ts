@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class StoreService {
   private gameState : any;
-  private timeState = 0;
+  private madLib : any;
   
   constructor() { }
 
@@ -15,7 +15,11 @@ export class StoreService {
     this.gameState = state;
   }
 
-  setTimeState(targetTime: number) {
-    this.timeState = targetTime;
+  getGameMadLib() {
+    return this.madLib;
+  }
+
+  setGameMadLib(madlib : any) {
+    this.madLib = madlib;
   }
 }
