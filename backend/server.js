@@ -6,6 +6,11 @@ app.use(cors({
     origin: '*'
 }));
 
+/*
+    Mocked API request//response for getting the initial state of the game.
+
+    Adds a session id if it was not set already, adds fake players if it was.
+*/
 app.get('/login', (req, res) => {
     let request = decipher(req);
     
@@ -19,18 +24,27 @@ app.get('/login', (req, res) => {
     }
     
     var login_response = {
-        "sessieid": request.sessieid || "80008",
-        "player_1": request.nickname,
-        "player_2": player2 || "",
-        "player_3": player3 || "",
-        "player_4": player4 || "",
-        "player_5": "",
-        "player_6": ""
+        "sessieid": request.sessieid || "R4ND0",
+        "player_1_name": request.nickname,
+        "player_1_score": 0,
+        "player_2_name": player2 || "",
+        "player_2_score": 0,
+        "player_3_name": player3 || "",
+        "player_3_score": 0,
+        "player_4_name": player4 || "",
+        "player_4_score": 0,
+        "player_5_name": "",
+        "player_5_score": 0,
+        "player_6_name": "",
+        "player_6_score": 0,
     }
 
     res.json(login_response);
 });
 
+/*
+    Mocked API request//response for getting a mad lib.
+*/
 app.get('/madlib', (req, res) => {
     let request = decipher(req);
 
@@ -75,8 +89,14 @@ app.get('/madlib', (req, res) => {
     }
 });
 
+/*
+    Helper function to not have to type out the JSON.parse bit. For easier reading.
+*/
 function decipher(json) {
     return JSON.parse(json.headers.requestjson);
 }
 
+/*
+    Start the mock API server on port 1234.
+*/
 app.listen(1234)

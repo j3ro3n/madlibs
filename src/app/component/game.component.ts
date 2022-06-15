@@ -4,24 +4,28 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { ApiService } from '../service/api.services';
 
+/*
+  Component to contain the game functionality.
+*/
 @Component({
   selector: 'game',
   templateUrl: '../view/game.component.html'
 })
 export class GameComponent {
+  // Local properties for display.
   formData : any;
-  formDataKeys : any[];
-  madLibData : any[];
-  madLibDataFull : any;
-
+  formDataKeys : any[] = [];
+  madLibData : any[] = [];
+  
   timeMax = 60;
   timeToGo = this.timeMax;
   timePercent = 100;
   interval: any;
 
-  endButtonText: string;
-  footer_message: string;
+  endButtonText: string = "";
+  footer_message: string = "";
 
+  // Constructor
   constructor(
     private api : ApiService,
     private store : StoreService,
@@ -33,7 +37,10 @@ export class GameComponent {
 
     // For quick testing, if left empty, fill with junk values.
     if (this.formData == undefined) {
-      // TODO: Replace this with a redirect to the main screen.
+      // TODO: Uncomment this
+      // this.quit();
+      
+      // TODO: Comment this
       this.formData = {
         "sessieid": "12345",
         "player_1_name": "Santa Clause",
@@ -49,45 +56,19 @@ export class GameComponent {
         "player_6_name": "Comet",
         "player_6_score": "23"
       }
-
-      // this.formData = {
-      //   "sessieid": "54321",
-      //   "player_1_name": "Santa Clause",
-      //   "player_1_score": "",
-      //   "player_2_name": "",
-      //   "player_2_score": "",
-      //   "player_3_name": "",
-      //   "player_3_score": "",
-      //   "player_4_name": "",
-      //   "player_4_score": "",
-      //   "player_5_name": "",
-      //   "player_5_score": "",
-      //   "player_6_name": "",
-      //   "player_6_score": ""
-      // }
-      
-      // this.formData = {
-      //   "sessieid": "80008",
-      //   "player_1": "Bob",
-      //   "player_2": "",
-      //   "player_3": "",
-      //   "player_4": "",
-      //   "player_5": "",
-      //   "player_6": ""
-      // }
     }
-
-    // Convert the array given to properties that can be queried in the template.
-    this.formDataKeys = [];
-    this.updatePlayerList();
-    this.madLibData = [];
-
-    // Get text for display.
-    this.endButtonText = this.generateButtonText();
-    this.footer_message = store.MAD_LIBS_FOOTER;
   }
 
+  // Event: onInit append. Do last minute updates to UI elements, store what is needed and display.
   async ngOnInit() {
+    // Load final text values.
+    this.endButtonText = this.generateButtonText();
+    this.footer_message = this.store.MAD_LIBS_FOOTER;
+
+    // Update the player list.
+    this.convertPlayerList();
+
+    // Get the current Mad lib and store it.
     let sessionID = this.formData.sessieid;
     await this.api.postMadLib({
       sessieid: sessionID,
@@ -96,62 +77,12 @@ export class GameComponent {
       this.store.setGameMadLib(result);
     });
     this.convertMadLibData(this.store.getGameMadLib());
-    this.madLibDataFull = this.store.getGameMadLib();
-    this.startCountdown();
+
+    // Start the clock.
+    this.timerCountdown();
   }
 
-  startCountdown() {
-    if (this.timeMax > 0) {
-      this.interval = setInterval(() => {
-        if(this.timeToGo > 0) {
-          this.timeToGo--;
-          this.setTimeBar();
-        } else {
-          this.endTimer();
-          let snackBarRef = this.snackBar.open("Timer ran out!", 'Test!', { duration: 5000 });
-        }
-      }, 1000)
-    } else {
-      this.timePercent = 100;
-    }
-  }
-
-  setTimeBar() {
-    this.timePercent = this.timeToGo / this.timeMax * 100;
-  }
-
-  endTimer() {
-    clearInterval(this.interval);
-  }
-
-  generateButtonText() : string {
-    let endButtonTexts = [];
-    endButtonTexts.push( "Create your Mad Lib!" );
-    endButtonTexts.push( "For pony!" );
-    endButtonTexts.push( "Push it. Push it real good!" );
-    endButtonTexts.push( "Today is a good day!" );
-    endButtonTexts.push( "For glory!" );
-    endButtonTexts.push( "Press it. You know you want to." );
-
-    let randomNumber = Math.floor( Math.random() * endButtonTexts.length );
-
-    return endButtonTexts[randomNumber];
-  }
-  
-  quit() {
-    this.router.navigate([ '' ]);
-  }
-
-  onReport() {
-    // TODO: WRITE REPORT FUNCTIONALITY
-    let snackBarRef = this.snackBar.open("Going into report mode!", 'Test!', { duration: 5000 });
-  }
-
-  onRefresh() {
-    // TODO: WRITE REFRESH FUNCTIONALITY
-    let snackBarRef = this.snackBar.open("Refreshing options!", 'Test!', { duration: 5000 });
-  }
-
+  // Convert the original Mad Lib json into a word list useable by the html.
   convertMadLibData(convMadLibData : any) {
     let madLibDataTemp = Object.keys(convMadLibData).filter(prop => {
       return prop !== "mad lib";
@@ -173,7 +104,8 @@ export class GameComponent {
     })
   }
 
-  updatePlayerList() {
+  // Convert the current game state json into a player list useable by the html.
+  convertPlayerList() {
     let formDataTemp = Object.keys(this.formData).filter(prop => {
       return prop !== "sessieid" && prop.indexOf("score") < 0
     });
@@ -191,5 +123,55 @@ export class GameComponent {
           "score": score
         });
     });
+  }
+
+  // Generate a random string to put on the confirm button.
+  generateButtonText() : string {
+    let endButtonTexts = [];
+    endButtonTexts.push( "Create your Mad Lib!" );
+    endButtonTexts.push( "For pony!" );
+    endButtonTexts.push( "Push it. Push it real good!" );
+    endButtonTexts.push( "Today is a good day!" );
+    endButtonTexts.push( "For glory!" );
+    endButtonTexts.push( "Press it. You know you want to." );
+
+    let randomNumber = Math.floor( Math.random() * endButtonTexts.length );
+
+    return endButtonTexts[randomNumber];
+  }
+  
+  // Return the user to the main screen.
+  quit() {
+    this.router.navigate([ '' ]);
+  }
+
+  // 'Shuffle' functionality. Refresh the words to use different words. 
+  refreshWords() {
+    // TODO: WRITE REFRESH FUNCTIONALITY
+    let snackBarRef = this.snackBar.open("Exception: NYI", 'Okay', { duration: 5000 });
+  }
+
+  // 'Report' functionality. Report words and make them go away.
+  reportWords() {
+    // TODO: WRITE REPORT FUNCTIONALITY
+    let snackBarRef = this.snackBar.open("Exception: NYI", 'Okay', { duration: 5000 });
+  }
+
+  // Start the countdown for the clock.
+  timerCountdown() {
+    if (this.timeMax > 0) {
+      this.interval = setInterval(() => {
+        if(this.timeToGo > 0) {
+          this.timeToGo--;
+          this.timePercent = this.timeToGo / this.timeMax * 100;
+        } else {
+          clearInterval(this.interval);
+          // TODO: Simulate end game forcing here.
+          let snackBarRef = this.snackBar.open("Exception: NYI", 'Okay', { duration: 5000 });
+        }
+      }, 1000)
+    } else {
+      this.timePercent = 100;
+    }
   }
 }

@@ -1,12 +1,13 @@
+<!-- The title toolbar. -->
 <p>
-    <mat-toolbar color="primary">
-        <span>Madder Libs</span>
-    </mat-toolbar>
+    <titleheader></titleheader>
 </p>
 
+<!-- Game content screen. More comments below to explain each segment. -->
 <p>
     <mat-card>
         <div class="row">
+            <!-- Timer bar, quit button and 'disabled button' showing session ID. -->
             <div class="col-sm-12 col-md-12 col-lg-9 col-xl-9 pb-2">
                 <span class="material-icons">timer</span><mat-progress-bar mode="determinate" value="{{timePercent}}"></mat-progress-bar>
             </div>
@@ -16,6 +17,7 @@
             </div>
         </div>
         <div class="row py-4">
+            <!-- Explanation bar. This holds the expansion panel for the game control explanation. -->
             <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                 <mat-expansion-panel>
                     <mat-expansion-panel-header style="text-align: center;">
@@ -33,10 +35,13 @@
             </div>
         </div>
         <div class="row">
+            <!-- Actual game component. -->
             <div class="col-sm-12 col-md-12 col-lg-1 col-xl-1">
+                <!-- Loop through all players and print their names and scores. -->
                 <div *ngFor="let key of formDataKeys" class="pt-2"><p><span matBadge="{{formData[key.score] || ''}}" matBadgePosition="before" matBadgeOverlap="false">{{formData[key.name] || ''}}</span></p></div>
             </div>
             <div class="col-sm-12 col-md-12 col-lg-10 col-xl-10">
+                <!-- Loop through all the mad lib options and display them on screen. -->
                 <div class="row" *ngFor="let key of madLibData; index as i">
                     <div class="col-sm-12 col-md-12 col-lg-2 col-xl-2 pt-2 pb-1"><mat-chip-list><mat-chip class="w-100" selected color="accent">{{madLibData[i].key |titlecase}}</mat-chip></mat-chip-list></div>
                     <div class="col-sm-12 col-md-12 col-lg-10 col-xl-10">
@@ -65,10 +70,11 @@
                 </div>
             </div>
             <div class="col-1">
-                <p><button mat-mini-fab color="accent" title="Shuffle" (click)="onRefresh()">
+                <!-- Show the shuffle and report buttons. -->
+                <p><button mat-mini-fab color="accent" title="Shuffle" (click)="refreshWords()">
                     <span class="material-icons">cached</span>
                 </button></p>
-                <p><button mat-mini-fab color="accent" title="Report" (click)="onReport()">
+                <p><button mat-mini-fab color="accent" title="Report" (click)="reportWords()">
                     <span class="material-icons">sms_failed</span>
                 </button></p>
             </div>
@@ -76,9 +82,12 @@
         <hr/>
         <div class="row">
             <div class="col-12">
+                <!-- Show the end button. -->
                 <button mat-raised-button color="primary" class="w-100">{{endButtonText}}</button>
             </div>
         </div>
+
+        <!-- This is a nice footer. -->
         <mat-card-footer>
             <sub>{{footer_message}}</sub>
         </mat-card-footer>

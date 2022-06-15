@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './component/home.component';
 import { GameComponent } from './component/game.component';
 import { LoginFormComponent } from './component/loginForm.component';
+import { TitleHeaderComponent } from './component/titleheader.component';
 
 import { ApiService } from './service/api.services';
 import { StoreService } from './service/localStore.services';
@@ -28,12 +29,18 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { HttpClient, HttpClientJsonpModule, HttpClientModule } from '@angular/common/http';
 
+/*
+  Use the NgModule decorator to declare all the components required in the application.
+
+  Warning, there be lots of 'em.
+*/
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
     GameComponent,
-    LoginFormComponent
+    LoginFormComponent,
+    TitleHeaderComponent
   ],
   imports: [
     AppRoutingModule,
