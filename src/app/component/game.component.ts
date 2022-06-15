@@ -17,8 +17,8 @@ export class GameComponent {
   formDataKeys : any[] = [];
   madLibData : any[] = [];
   
-  timeMax = 60;
-  timeToGo = this.timeMax;
+  timeMax: number = 0;
+  timeToGo: number = 0;
   timePercent = 100;
   interval: any;
 
@@ -79,6 +79,8 @@ export class GameComponent {
     this.convertMadLibData(this.store.getGameMadLib());
 
     // Start the clock.
+    this.timeMax = this.store.getTimeLimit();
+    this.timeToGo = this.timeMax;
     this.timerCountdown();
   }
 
