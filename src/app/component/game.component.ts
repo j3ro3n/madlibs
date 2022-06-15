@@ -1,8 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, ComponentFactoryResolver } from '@angular/core';
 import { StoreService } from '../service/localStore.services';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { ApiService } from '../service/api.services';
+
+export interface MadLibDataObject {
+  key: string,
+  word1: string,
+  word1color: string,
+  word2: string,
+  word2color: string,
+  word3: string,
+  word3color: string,
+  word4: string,
+  word4color: string
+}
 
 /*
   Component to contain the game functionality.
@@ -15,7 +27,8 @@ export class GameComponent {
   // Local properties for display.
   formData : any;
   formDataKeys : any[] = [];
-  madLibData : any[] = [];
+  madLibData : MadLibDataObject[] = [];
+  madLibChoices : any = {};
   
   timeMax: number = 0;
   timeToGo: number = 0;
@@ -99,9 +112,13 @@ export class GameComponent {
       this.madLibData.push({
         key: item,
         word1: context[word1],
+        word1color: "",
         word2: context[word2],
+        word2color: "",
         word3: context[word3],
-        word4: context[word4]
+        word3color: "",
+        word4: context[word4],
+        word4color: ""
       });
     })
   }
@@ -141,10 +158,77 @@ export class GameComponent {
 
     return endButtonTexts[randomNumber];
   }
+
+  /*
+    This class will change bindings of a category worth of buttons, either coloring one of the buttons
+    or uncoloring all of the buttons.
+  */
+  highlightButton(context: MadLibDataObject, button: number) {
+    context.word1color = '';
+    context.word2color = '';
+    context.word3color = '';
+    context.word4color = '';
+
+    switch (button) {
+      case 1:
+        context.word1color = 'warn';
+      break;
+      case 2:
+        context.word2color = 'warn';
+      break;
+      case 3:
+        context.word3color = 'warn';
+      break;
+      case 4:
+        context.word4color = 'warn';
+      break;
+      default:
+        // Do nothing, leave all buttons uncolored.
+      break;
+    }
+  }
   
   // Return the user to the main screen.
   quit() {
     this.router.navigate([ '' ]);
+  }
+
+  onWordClicked(category: string, word: string) {
+    let categoryObject = this.madLibData.filter((item) => {
+      return item.key == category;
+    })[0];
+    let categoryWord = Object.keys(categoryObject).filter((itemKey) => {
+      switch (itemKey) {
+        case "word1":
+          return categoryObject.word1 == word;
+        case "word2":
+          return categoryObject.word2 == word;
+        case "word3":
+          return categoryObject.word3 == word;
+        case "word4":
+          return categoryObject.word4 == word;
+        default:
+          return false;
+      }
+    })[0];
+    
+    // Use the highlighter to show pretty buttons.
+    if (categoryWord == undefined) {
+      // No matching word was found. Unhighlight all buttons.
+      this.highlightButton(
+        categoryObject,
+        0
+      );
+    } else {
+      // A matching word was found. Highlight that buttons.
+      this.highlightButton(
+        categoryObject, 
+        parseInt(categoryWord.substring(categoryWord.length-1, categoryWord.length))
+      );
+    }
+
+    // Save the response to the result matrix.
+    this.madLibChoices[category] = word;
   }
 
   // 'Shuffle' functionality. Refresh the words to use different words. 

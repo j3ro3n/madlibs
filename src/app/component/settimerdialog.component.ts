@@ -2,6 +2,9 @@ import { Component, ChangeDetectorRef, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { StoreService } from '../service/localStore.services';
 
+/*
+  Interface for objects used in Dialogs.
+*/
 export interface TimerDialogData {
   timeLimit: number;
 }

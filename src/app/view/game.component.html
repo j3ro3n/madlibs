@@ -49,19 +49,19 @@
                             <div class="col-sm-12 col-md-12 col-lg-9 col-xl-9">
                                 <div class="row">
                                     <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 pb-3 pt-2 button-row">
-                                        <button class="w-50" mat-raised-button>{{madLibData[i].word1 |titlecase}}</button>
-                                        <button class="w-50" mat-raised-button>{{madLibData[i].word2 |titlecase}}</button>
+                                        <button mat-raised-button class="w-50" color="{{madLibData[i].word1color}}" (click)="onWordClicked(madLibData[i].key, madLibData[i].word1); input.value = '';">{{madLibData[i].word1 |titlecase}}</button>
+                                        <button mat-raised-button class="w-50" color="{{madLibData[i].word2color}}" (click)="onWordClicked(madLibData[i].key, madLibData[i].word2); input.value = '';">{{madLibData[i].word2 |titlecase}}</button>
                                     </div>
                                     <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 pb-3 pt-2 button-row">
-                                        <button class="w-50" mat-raised-button>{{madLibData[i].word3 |titlecase}}</button>
-                                        <button class="w-50" mat-raised-button>{{madLibData[i].word4 |titlecase}}</button>
+                                        <button mat-raised-button class="w-50" color="{{madLibData[i].word3color}}" (click)="onWordClicked(madLibData[i].key, madLibData[i].word3); input.value = '';">{{madLibData[i].word3 |titlecase}}</button>
+                                        <button mat-raised-button class="w-50" color="{{madLibData[i].word4color}}" (click)="onWordClicked(madLibData[i].key, madLibData[i].word4); input.value = '';">{{madLibData[i].word4 |titlecase}}</button>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-12 col-md-12 col-lg-3 col-xl-3">
                                 <mat-form-field appearance="fill" class="loginInput" class="pb-1 w-100">
                                     <mat-label>Enter your own mad lib...</mat-label>
-                                    <input matInput #input maxlength="17">
+                                    <input matInput #input maxlength="17" (keyup)="onWordClicked(madLibData[i].key, input.value)">
                                     <mat-hint align="end">{{input.value?.length || 0}}/17</mat-hint>
                                 </mat-form-field>
                             </div>

@@ -53,12 +53,18 @@ app.get('/madlib', (req, res) => {
     if (request.request == "mad lib") {
         res.json(
             {
-                "mad lib": "A malicious $CREATURE drowns at a $EVENT to clean the $SUBSTANCE from another $OBJECT.",
+                "mad lib": "A malicious $CREATURE1 drowns at a $EVENT to clean a $CREATURE2 the $SUBSTANCE from another $OBJECT.",
+                "creature_1": {
+                    "creature_1_1": "Gecko",
+                    "creature_1_2": "Lynx",
+                    "creature_1_3": "Homo sapiens",
+                    "creature_1_4": "Tyrannosaurus Rex"
+                },
                 "creature": {
-                    "creature_1": "Gecko",
-                    "creature_2": "Lynx",
-                    "creature_3": "Homo sapiens",
-                    "creature_4": "Tyrannosaurus Rex"
+                    "creature_1": "Jaguar",
+                    "creature_2": "Kabouter Plop",
+                    "creature_3": "Tinky Winky",
+                    "creature_4": "Ninja"
                 },
                 "event": {
                     "event_1": "Birthday party",
