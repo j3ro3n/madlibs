@@ -35,6 +35,8 @@ export class GameComponent {
   madLibChoices : any = {};
   madLibSentence : string = "";
 
+  submitted : boolean = false;
+
   endButtonText: string = "";
   footer_message: string = "";
 
@@ -96,9 +98,128 @@ export class GameComponent {
     // Start the clock.
     this.timer.setClock(this.store.getTimeLimit(), this.store.getTimeLimit());
     this.timer.timerCountdown();
-    this.timer.timerDone.subscribe((event) => {
-      console.log("Timer is done!");
+    this.timer.timerDone.subscribe(() => {
+      if (!this.submitted) {
+        if (this.answersAllGiven()) {
+          this.submitMadLib();
+        } else {
+          let allCategories: any[] = []
+          for (let index = 0; index < this.madLibData.length; index ++) {
+            allCategories.push({
+              key: this.madLibData[index].key,
+              category: this.madLibData[index].category,
+              mldi: index
+            });
+          }
+          for (let index = 0; index < allCategories.length; index ++) {
+            let result = this.madLibChoices[allCategories[index].category];
+            if (result !== undefined) {
+              let iResult = result.find((key: any) => {
+                return key.category == allCategories[index].key;
+              });
+              if (iResult !== undefined) {
+                allCategories.splice(index, 1);
+                index--;
+              }
+            }
+          };
+          
+          allCategories.forEach((categoryKey) => {
+             let randomNumber = Math.ceil(Math.random() * 4);
+            switch(randomNumber){
+              case 1:
+                this.addChoice(
+                  this.madLibData[categoryKey.mldi], 
+                  categoryKey.key,
+                  this.madLibData[categoryKey.mldi].word1
+                );
+              break;
+              case 2:
+                this.addChoice(
+                  this.madLibData[categoryKey.mldi], 
+                  categoryKey.key,
+                  this.madLibData[categoryKey.mldi].word2
+                );
+              break;
+              case 3:
+                this.addChoice(
+                  this.madLibData[categoryKey.mldi], 
+                  categoryKey.key,
+                  this.madLibData[categoryKey.mldi].word3
+                );
+              break;
+              case 4:
+                this.addChoice(
+                  this.madLibData[categoryKey.mldi], 
+                  categoryKey.key,
+                  this.madLibData[categoryKey.mldi].word4
+                );
+              break;
+              default:
+                // This is literally unreachable.
+              break;
+            }
+          });
+  
+          this.submitMadLib(false);
+        }
+      }
     });
+  }
+
+  // Add a choice to prevent code redundancy
+  addChoice(categoryObject: MadLibDataObject, category: string, word: string) {
+    if (this.madLibChoices[categoryObject.category] !== undefined) {
+      
+      // A response for this category was already stated. Add to array.
+      // Check if the sent in version was already logged, or if it's a second answer.
+      let previousAnswer = this.madLibChoices[categoryObject.category].filter((descriptor: any) => {
+        return descriptor.category == category;
+      });
+      if (previousAnswer.length == 0) {
+        if (word.trim() !== '') {
+          this.madLibChoices[categoryObject.category].push({
+            word: word,
+            category: category
+          });
+        }
+      } else {
+        if (word.trim() == '') {
+          let removalIndex = -1;
+          for (let index = 0; index < this.madLibChoices[categoryObject.category].length; index++) {
+            if (this.madLibChoices[categoryObject.category][index].category == category) {
+              removalIndex = index;
+              continue;
+            }
+          }
+          this.madLibChoices[categoryObject.category].splice(removalIndex, 1);
+        } else {
+          previousAnswer[0].word = word;
+        }
+      }
+    } else {
+      // No response has been logged for this yet. Add it.
+      this.madLibChoices[categoryObject.category] = [
+        {
+          word: word,
+          category: category
+        }
+      ];
+    }
+  }
+
+  // See if all answers were given
+  answersAllGiven(): boolean {
+    // Get all the parts to be replaced.
+    let substitute_words = this.madLibSentence.split('$');
+
+    // Count the amount of answers given.
+    let madLibChoicesTrueLength = 0;
+    Object.keys(this.madLibChoices).forEach((internalArray: any) => {
+      madLibChoicesTrueLength += this.madLibChoices[internalArray].length;
+    });
+
+    return (substitute_words.length-1 == madLibChoicesTrueLength);
   }
 
   // Convert the original Mad Lib json into a word list useable by the html.
@@ -236,42 +357,7 @@ export class GameComponent {
     }
 
     // Save the response to the result matrix.
-    if (this.madLibChoices[categoryObject.category] !== undefined) {
-      // A response for this category was already stated. Add to array.
-      // Check if the sent in version was already logged, or if it's a second answer.
-      let previousAnswer = this.madLibChoices[categoryObject.category].filter((descriptor: any) => {
-        return descriptor.category == category;
-      });
-      if (previousAnswer.length == 0) {
-        if (word.trim() !== '') {
-          this.madLibChoices[categoryObject.category].push({
-            word: word,
-            category: category
-          });
-        }
-      } else {
-        if (word.trim() == '') {
-          let removalIndex = -1;
-          for (let index = 0; index < this.madLibChoices[categoryObject.category].length; index++) {
-            if (this.madLibChoices[categoryObject.category][index].category == category) {
-              removalIndex = index;
-              continue;
-            }
-          }
-          this.madLibChoices[categoryObject.category].splice(removalIndex, 1);
-        } else {
-          previousAnswer[0].word = word;
-        }
-      }
-    } else {
-      // No response has been logged for this yet. Add it.
-      this.madLibChoices[categoryObject.category] = [
-        {
-          word: word,
-          category: category
-        }
-      ];
-    }
+    this.addChoice(categoryObject, category, word);
   }
 
   // 'Shuffle' functionality. Refresh the words to use different words. 
@@ -287,21 +373,15 @@ export class GameComponent {
   }
 
   // Create and submit the finished Mad Lib.
-  submitMadLib() {
-    // Get all the parts to be replaced.
-    let substitute_words = this.madLibSentence.split('$');
-
-    // Count the amount of answers given.
-    let madLibChoicesTrueLength = 0;
-    Object.keys(this.madLibChoices).forEach((internalArray: any) => {
-      madLibChoicesTrueLength += this.madLibChoices[internalArray].length;
-    });
-
+  submitMadLib(voteable: boolean = true) {
     // If the amount of answers given does not equal one less than the parts to be replaced,
     // show a snackbar. Otherwise, substitute for category words in mad lib.
-    if (substitute_words.length-1 !== madLibChoicesTrueLength) {
+    if (!this.answersAllGiven()) {
       let snackBarRef = this.snackBar.open("You need to select/write a word for every category before submitting!", 'Oops!', { duration: 3000 });
     } else {
+      this.submitted = true;
+      // Get all the parts to be replaced.
+      let substitute_words = this.madLibSentence.split('$');
       let finishedMadLib = "";
       substitute_words.forEach((partial) => {
         let firstWord = partial.substring(0, partial.indexOf(' '));
@@ -331,7 +411,7 @@ export class GameComponent {
       });
       dialogRef.disableClose = true;
       
-      console.log(finishedMadLib);
+      console.log(finishedMadLib + " > voteable: " + voteable);
     }
   }
 }
