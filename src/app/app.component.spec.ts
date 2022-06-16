@@ -2,6 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AppComponent } from './app.component';
 
+/*
+  Auto generated. Don't change this (too much) unless you know what you're doing.
+*/
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -20,10 +23,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'MadderLibs'`, () => {
+  it(`should have as title 'Madder Libs'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('MadderLibs');
+    expect(app.title).toEqual('Madder Libs');
   });
 
   it('should render title', () => {

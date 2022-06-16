@@ -1,6 +1,11 @@
+<!-- The card that holds the login form. Does some validation from here. -->
 <mat-card>
     <mat-card-title>The story begins...</mat-card-title>
-    <mat-card-subtitle>But first...</mat-card-subtitle>
+    <mat-card-subtitle style="text-align:end">
+        <button mat-mini-fab color="accent" (click)="openTimerDialog()">
+            <span class="material-icons">timer</span>
+        </button>
+    </mat-card-subtitle>
     <form [formGroup]="loginForm">
         <mat-card-content>
             <p>

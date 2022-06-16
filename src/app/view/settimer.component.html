@@ -1,0 +1,12 @@
+<!-- This component holds the html that is displayed in the timer dialog. -->
+<h1 mat-dialog-title>Want to set a timer?</h1>
+<div mat-dialog-content>
+  <p>This will prevent your rounds from lasting forever. If you set a timer, the round will automatically end when the timer runs out. Beware not to set this too low though! If you do not want to play with a timer, you may set this to 0 seconds.</p>
+  
+  <mat-slider matInput #slider min="0" max="300" step="1" value="{{formTimeLimit}}"></mat-slider>
+  <mat-hint>Current setting: {{slider.value}} seconds.</mat-hint>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onDialogCancel()">No Thanks</button>
+  <button mat-button (click)="onDialogConfirm(slider.value)" cdkFocusInitial>Sure</button>
+</div>
