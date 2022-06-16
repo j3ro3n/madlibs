@@ -10,6 +10,7 @@ export class TimerService {
   private timeToGo: number = 0;
   private timePercent = 100;
   private interval: any;
+  private timerSet: boolean = false;
   @Output() timerDone = new EventEmitter<any>();
   
   // Constructor
@@ -26,9 +27,15 @@ export class TimerService {
     return this.timePercent;
   }
 
+  // Returns true if a timer is running.
+  getTimerSet(): boolean {
+    return this.timerSet;
+  }
+
   // Start the countdown for the clock.
   timerCountdown() {
     if (this.timeMax > 0) {
+      this.timerSet = true;
       this.interval = setInterval(() => {
         if(this.timeToGo > 0) {
           this.timeToGo--;

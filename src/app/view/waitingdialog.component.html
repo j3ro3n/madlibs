@@ -4,7 +4,7 @@
   <div class="col-12">
     <mat-spinner style="margin:0 auto;"></mat-spinner>
   </div>
-  <div class="col-12 mt-5" *ngIf="timer.getTimePercent() !== 100">
+  <div class="col-12 mt-5" *ngIf="timer.getTimerSet()">
     <span class="material-icons">timer</span><mat-progress-bar mode="determinate" value="{{timer.getTimePercent()}}"></mat-progress-bar>
   </div>
 </div>

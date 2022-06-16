@@ -9,7 +9,7 @@
         <div class="row">
             <!-- Timer bar, quit button and 'disabled button' showing session ID. -->
             <div class="col-sm-12 col-md-12 col-lg-9 col-xl-9 pb-2">
-                <span class="material-icons">timer</span><mat-progress-bar mode="determinate" value="{{timer.getTimePercent()}}"></mat-progress-bar>
+                <span *ngIf="timer.getTimerSet()"><span class="material-icons">timer</span><mat-progress-bar mode="determinate" value="{{timer.getTimePercent()}}"></mat-progress-bar></span>
             </div>
             <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
                 <button mat-stroked-button style="margin-right:5px" (click)="quit()">Quit</button>
