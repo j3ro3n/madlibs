@@ -57,7 +57,7 @@ export class GameComponent {
       // TODO: Uncomment this
       // this.quit();
       
-      // TODO: Comment this
+      // TODO: Delete this.
       this.formData = {
         "sessieid": "12345",
         "player_1_name": "Santa Clause",
@@ -73,6 +73,7 @@ export class GameComponent {
         "player_6_name": "Comet",
         "player_6_score": "23"
       }
+      this.store.setPlayerName("Blitzen");
     }
   }
 
