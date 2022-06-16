@@ -66,7 +66,7 @@ export class LoginFormComponent {
   /*
     Open the set timer dialog. 
   */
-    openTimerDialog(): void {
+  openTimerDialog(): void {
     const dialogRef = this.dialog.open(TimerSetDialog, {
       width: '400px',
       data: { timeLimit: this.store.getTimeLimit() }

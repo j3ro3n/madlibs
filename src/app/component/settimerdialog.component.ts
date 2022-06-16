@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, Inject } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { StoreService } from '../service/localStore.services';
 
@@ -13,8 +13,8 @@ export interface TimerDialogData {
   This component holds the required code to show and handle the Timer Dialog.
 */
 @Component({
-  selector: 'dialog-overview-example-dialog',
-  templateUrl: './../view/settimer.component.html',
+  selector: 'dialog-settimer',
+  templateUrl: './../view/settimerdialog.component.html',
 })
 export class TimerSetDialog {
   // Required field for display.
@@ -24,7 +24,6 @@ export class TimerSetDialog {
   constructor(
     public dialogRef: MatDialogRef<TimerSetDialog>,
     @Inject(MAT_DIALOG_DATA) public data: TimerDialogData,
-    private cd: ChangeDetectorRef,
     protected store: StoreService
   ) {}
 

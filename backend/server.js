@@ -37,6 +37,7 @@ app.get('/login', (req, res) => {
         "player_5_score": 0,
         "player_6_name": "",
         "player_6_score": 0,
+        "sessieTimer": request.sessieTimer
     }
 
     res.json(login_response);
@@ -53,37 +54,50 @@ app.get('/madlib', (req, res) => {
     if (request.request == "mad lib") {
         res.json(
             {
-                "mad lib": "A malicious $CREATURE1 drowns at a $EVENT to clean a $CREATURE2 the $SUBSTANCE from another $OBJECT.",
-                "creature_1": {
-                    "creature_1_1": "Gecko",
-                    "creature_1_2": "Lynx",
-                    "creature_1_3": "Homo sapiens",
-                    "creature_1_4": "Tyrannosaurus Rex"
-                },
-                "creature": {
-                    "creature_1": "Jaguar",
-                    "creature_2": "Kabouter Plop",
-                    "creature_3": "Tinky Winky",
-                    "creature_4": "Ninja"
-                },
-                "event": {
-                    "event_1": "Birthday party",
-                    "event_2": "Community Cleanup",
-                    "event_3": "Car race",
-                    "event_4": "Paddle game"
-                },
-                "substance": {
-                    "substance_1": "Alcohol",
-                    "substance_2": "Oil",
-                    "substance_3": "Peanut Butter",
-                    "substance_4": "Honey"
-                },
-                "object": {
-                    "object_1": "Baseball Bat",
-                    "object_2": "Smartphone",
-                    "object_3": "Drinking bottle",
-                    "object_4": "Lighter"
-                }
+                "madlib": "A malicious $CREATURE drowns a $CREATURE at a $EVENT to clean the $SUBSTANCE from a $OBJECT.",
+                "creature": [
+                    {
+                        "id": 1,
+                        "creature_1": "Gecko",
+                        "creature_2": "Lynx",
+                        "creature_3": "Homo sapiens",
+                        "creature_4": "Tyrannosaurus Rex"
+                    },
+                    {
+                        "id": 2,
+                        "creature_1": "Jaguar",
+                        "creature_2": "Kabouter Plop",
+                        "creature_3": "Tinky Winky",
+                        "creature_4": "Ninja"
+                    }
+                ],
+                "event": [
+                    {
+                        "id": 1,
+                        "event_1": "Birthday party",
+                        "event_2": "Community Cleanup",
+                        "event_3": "Car race",
+                        "event_4": "Paddle game"
+                    }
+                ],
+                "substance": [
+                    {
+                        "id": 1,
+                        "substance_1": "Alcohol",
+                        "substance_2": "Oil",
+                        "substance_3": "Peanut Butter",
+                        "substance_4": "Honey"
+                    }
+                ],
+                "object": [
+                    {
+                        "id": 1,
+                        "object_1": "Baseball Bat",
+                        "object_2": "Smartphone",
+                        "object_3": "Drinking bottle",
+                        "object_4": "Lighter"
+                    }
+                ]
             }
         );
     } else {
