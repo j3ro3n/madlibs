@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './component/home.component';
@@ -7,6 +8,7 @@ import { GameComponent } from './component/game.component';
 import { LoginFormComponent } from './component/loginForm.component';
 import { TitleHeaderComponent } from './component/titleheader.component';
 import { TimerSetDialog } from './component/settimerdialog.component';
+import { WaitingDialog } from './component/waitingdialog.component';
 
 import { ApiService } from './service/api.services';
 import { StoreService } from './service/localStore.services';
@@ -27,10 +29,11 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { HttpClient, HttpClientJsonpModule, HttpClientModule } from '@angular/common/http';
+import { TimerService } from './service/timer.services';
 
 /*
   Use the NgModule decorator to declare all the components required in the application.
@@ -44,7 +47,8 @@ import { HttpClient, HttpClientJsonpModule, HttpClientModule } from '@angular/co
     GameComponent,
     LoginFormComponent,
     TimerSetDialog,
-    TitleHeaderComponent
+    TitleHeaderComponent,
+    WaitingDialog
   ],
   imports: [
     AppRoutingModule,
@@ -65,14 +69,15 @@ import { HttpClient, HttpClientJsonpModule, HttpClientModule } from '@angular/co
     MatProgressBarModule,
     MatSliderModule,
     MatSnackBarModule,
+    MatProgressSpinnerModule,
     MatToolbarModule,
     ReactiveFormsModule
   ],
   providers: [
     ApiService,
-    HttpClientJsonpModule,
     HttpClient,
-    StoreService
+    StoreService,
+    TimerService
   ],
   bootstrap: [
     AppComponent

@@ -6,6 +6,7 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class StoreService {
   // Stored properties
+  private playerName : string = "";
   private gameState : any;
   private madLib : any;
   private timeLimit : number = 0;
@@ -33,6 +34,16 @@ export class StoreService {
   // Update/set the current game state.
   setGameState(state : any) {
     this.gameState = state;
+  }
+
+  // Get the nickname chosen at the start.
+  getPlayerName() {
+    return this.playerName;
+  }
+
+  // At the start, set the player name for this player.
+  setPlayerName(name: string) {
+    this.playerName = name;
   }
 
   // Get the current time limit.

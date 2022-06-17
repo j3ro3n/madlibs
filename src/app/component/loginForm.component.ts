@@ -49,6 +49,7 @@ export class LoginFormComponent {
   async onPlay() {
     if (this.loginForm.valid) {
       try {
+        this.store.setPlayerName(this.loginForm.value.nickname);
         let transmitForm = this.loginForm.value;
         transmitForm["sessieTimer"] = this.store.getTimeLimit();
         await this.api.postLogin(transmitForm).then((result) => {
@@ -66,7 +67,7 @@ export class LoginFormComponent {
   /*
     Open the set timer dialog. 
   */
-    openTimerDialog(): void {
+  openTimerDialog(): void {
     const dialogRef = this.dialog.open(TimerSetDialog, {
       width: '400px',
       data: { timeLimit: this.store.getTimeLimit() }

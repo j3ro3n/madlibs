@@ -1,0 +1,10 @@
+<!-- This component holds waiting for something dialog. -->
+<h1 mat-dialog-title>Waiting for {{reason}}...</h1>
+<div mat-dialog-content class="row">
+  <div class="col-12">
+    <mat-spinner style="margin:0 auto;"></mat-spinner>
+  </div>
+  <div class="col-12 mt-5" *ngIf="timer.getTimerSet()">
+    <span class="material-icons">timer</span><mat-progress-bar mode="determinate" value="{{timer.getTimePercent()}}"></mat-progress-bar>
+  </div>
+</div>
