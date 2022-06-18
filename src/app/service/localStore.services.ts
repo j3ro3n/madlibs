@@ -44,8 +44,11 @@ export class StoreService {
   }
 
   // Set the playerId, or overwrite it if it was set already.
+  // Once set, don't change it with a new value, but allow it to be overwritten by a resetter.
   setPlayerId(playerId: string) {
-    this.playerId = playerId;
+    if (this.playerId == "" || playerId == ""){
+      this.playerId = playerId;
+    }
   }
 
   // Get the nickname chosen at the start.
@@ -54,8 +57,11 @@ export class StoreService {
   }
 
   // At the start, set the player name for this player.
+  // Once set, don't change it with a new value, but allow it to be overwritten by a resetter.
   setPlayerName(name: string) {
-    this.playerName = name;
+    if (this.playerId == "" || name == ""){
+      this.playerName = name;
+    }
   }
 
   // Get the current time limit.

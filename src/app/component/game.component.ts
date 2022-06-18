@@ -55,26 +55,30 @@ export class GameComponent {
 
     // For quick testing, if left empty, fill with junk values.
     if (this.gameData == undefined) {
-      // this.quit();
-      
-      // TODO: Delete this.
-      this.gameData = {
-        "sessieid": "S4NT4",
-        "player_1_name": "Santa Clause",
-        "player_1_score": "12",
-        "player_2_name": "Donner",
-        "player_2_score": "6",
-        "player_3_name": "Blitzen",
-        "player_3_score": "2",
-        "player_4_name": "Dasher",
-        "player_4_score": "10",
-        "player_5_name": "Dancer",
-        "player_5_score": "9",
-        "player_6_name": "Comet",
-        "player_6_score": "23"
-      }
-      this.store.setPlayerName("Santa Clause");
-      this.store.setPlayerId("1");
+      this.quit();
+
+      // this.gameData = {
+      //   "sessieid": "G4M3T",
+      //   "player_1_name": "Test_1",
+      //   "player_1_score": 1,
+      //   "player_1_id": "TEST1",
+      //   "player_2_name": "Test_2",
+      //   "player_2_score": 2,
+      //   "player_2_id": "TEST2",
+      //   "player_3_name": "Test_3",
+      //   "player_3_score": 3,
+      //   "player_3_id": "TEST3",
+      //   "player_4_name": "Test_4",
+      //   "player_4_score": 4,
+      //   "player_4_id": "TEST4",
+      //   "player_5_name": "Test_5",
+      //   "player_5_score": 5,
+      //   "player_5_id": "TEST5",
+      //   "player_6_name": "Test_6",
+      //   "player_6_score": 6,
+      //   "player_6_id": "TEST6",
+      //   "sessieTimer": 0
+      // }
     }
   }
 
@@ -89,12 +93,17 @@ export class GameComponent {
 
     // Get the current Mad lib and store it.
     let sessionID = this.gameData.sessieid;
-    await this.api.post({
-      sessieid: sessionID,
-      request: "mad lib"
-    }, "madlib").then((result) => {
-      this.store.setGameMadLib(result);
-    });
+    try {
+      // Get the current Mad Lib from the server.
+      await this.api.post({
+        sessieid: sessionID,
+        request: "mad lib"
+      }, "madlib").then((result) => {
+        this.store.setGameMadLib(result);
+      });
+    } catch(exception) {
+      let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+    }
     this.convertMadLibJSONtoUIObjects(this.store.getGameMadLib());
 
     // Start the clock.
@@ -226,11 +235,13 @@ export class GameComponent {
 
   // Convert the current game state json into a player list useable by the html.
   convertGameJSONtoUIObjects() {
-    // TODO SET PLAYER NAME AND ID
-    
     let gameDataTemp = Object.keys(this.gameData).filter(prop => {
-      return prop !== "sessieid" && prop.indexOf("score") < 0
+      return prop !== "sessieid" 
+        && prop.indexOf("score") < 0 
+        && prop.indexOf("_id") < 0
+        && prop !== "sessieTimer"
     });
+    
     gameDataTemp.forEach(item => {
       let name = item.indexOf("_name") > 0 
         ? item.substring(0, item.length-5).concat("_name") 
@@ -238,39 +249,43 @@ export class GameComponent {
       let score = item.indexOf("_name") > 0
         ? item.substring(0, item.length-5).concat("_score")
         : item.concat("_score");
+      let id = item.indexOf("_name") > 0
+        ? item.substring(0, item.length-5).concat("_id")
+        : item.concat("_id");
       
-      this.gameDataKeys.push(
-        { 
-          "name": name,
-          "score": score
-        });
+      if (this.gameData[item] !== '') {
+        this.gameDataKeys.push(
+          { 
+            "name": name,
+            "score": score,
+            "id": id
+          });
+      }
     });
+
+    this.store.setPlayerId(this.gameData[this.gameDataKeys[this.gameDataKeys.length-1].id]);
   }
 
   // Convert the original Mad Lib json into a word list useable by the html.
   convertMadLibJSONtoUIObjects(convMadLibData : any) {
     this.madLibSentence = convMadLibData.madlib;
-    let madLibDataTemp = Object.keys(convMadLibData).filter(prop => {
-      return prop !== "madlib";
-    });
-    madLibDataTemp.forEach(item => {
-      let categoryArray = convMadLibData[item];
-      categoryArray.forEach((context: any) => {
-        let word1 = item + "_1";
-        let word2 = item + "_2";
-        let word3 = item + "_3";
-        let word4 = item + "_4";
-
+    
+    let madLibDataTemp = convMadLibData.categories;
+        
+    madLibDataTemp.forEach((category : any) => {
+      let categoryName = category.type;
+      
+      category.words.forEach((option : any) => {
         this.madLibData.push({
-          key: item + ' ' + context.id,
-          category: item.toUpperCase(),
-          word1: context[word1],
+          key: categoryName + ' ' + option.id,
+          category: categoryName.toUpperCase(),
+          word1: option.word_1,
           word1color: "",
-          word2: context[word2],
+          word2: option.word_2,
           word2color: "",
-          word3: context[word3],
+          word3: option.word_3,
           word3color: "",
-          word4: context[word4],
+          word4: option.word_4,
           word4color: ""
         });
       });
@@ -421,16 +436,20 @@ export class GameComponent {
         // Wait for one second between requests.
         await new Promise(f => setTimeout(f, 1000));
         
-        // Request the voting state.
-        await this.api.post({
-          sessieid: this.gameData.sessieid,
-          nickname: this.store.getPlayerName(),
-          playerid: this.store.getPlayerId(),
-          madlib: finishedMadLib,
-          voteable: voteable
-        }, "submit").then((result: any) => {
-          votingStateObject = result;
-        });
+        try {
+          // Request the voting state.
+          await this.api.post({
+            sessieid: this.gameData.sessieid,
+            nickname: this.store.getPlayerName(),
+            playerid: this.store.getPlayerId(),
+            madlib: finishedMadLib,
+            voteable: voteable
+          }, "submit").then((result: any) => {
+            votingStateObject = result;
+          });
+        } catch(exception) {
+          let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+        }
       }
 
       this.store.setVotingState(votingStateObject);

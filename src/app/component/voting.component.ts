@@ -5,6 +5,7 @@ import { ApiService } from '../service/api.services';
 import { WaitingDialog } from './waitingdialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TimerService } from '../service/timer.services';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface VoteDataObject {
   player: string,
@@ -35,6 +36,7 @@ export class VoteComponent {
     constructor(
         private api : ApiService,
         public waitingDialog : MatDialog,
+        private snackBar: MatSnackBar,
         private store : StoreService,
         protected timer : TimerService,
         private router : Router
@@ -92,7 +94,14 @@ export class VoteComponent {
         this.timer.setClock(30);
         this.timer.timerCountdown();
         this.timer.timerDone.subscribe(() => {
-            console.log("Timer done!");
+            this.onVote({
+                disabled: "true",
+                id: "null",
+                madlib: "",
+                name: "",
+                player: "",
+                uiid: -1
+            });
         });
     }
 
@@ -201,9 +210,20 @@ export class VoteComponent {
 
     // When the next button is pressed, the game should put in a request for the sessions mad lib.
     // This will either generate the next mad lib or will give another generated option.
-    onNext() {
-        // API call here.
-        console.log("Next was pressed.");
+    async onNext() {
+        try {
+            await this.api.post({
+                nickname: this.store.getPlayerName(),
+                playerid: this.store.getPlayerId(),
+                sessieid: this.sessionID,
+                sessieTimer: this.store.getTimeLimit()
+            }, "gamestate").then((result) => {
+              this.store.setGameState(result);
+            });
+            this.router.navigate(['game']);
+        } catch(exception) {
+            let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+        }
     }
 
     // When a vote is cast, this function is called. It disables all buttons and submits the vote.
@@ -216,13 +236,43 @@ export class VoteComponent {
             item.disabled = "true"
         });
 
-        // API call to submit vote, then show result:
-        // This is test:
-        this.timer.stopTimer();
-        await new Promise(f => setTimeout(f, 3000));
-        this.optionWinner = 4;
+        // API call to submit vote, then show result.
+        if (this.timer.isTimerSet()) {
+            this.timer.stopTimer();
+        }
         
-        console.log(context);
+        // Set result to error by default, then request updates every second until everyone has voted.
+        let votingResultStateObject: any = {
+            error: "awaiting-votes-error"
+        };
+        while (votingResultStateObject.error !== undefined) {
+            // Wait for one second between requests.
+            await new Promise(f => setTimeout(f, 1000));
+            
+            try {
+                // Submit the vote. The backend knows only to process it once.
+                await this.api.post({
+                    sessieid: this.sessionID,
+                    playerid: this.store.getPlayerId(),
+                    votedfor: context.id
+                }, "vote").then((result: any) => {
+                    votingResultStateObject = result;
+                });
+            } catch(exception) {
+                let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+            }
+        }
+        
+        let winnerContext = this.votingData.find((voter) => {
+            return voter.id == votingResultStateObject.winner;
+        });
+        // This will really never not return a context, but just for safety, fall back to 10.
+        // Doesn't really matter for score, just doesn't output any winner feedback.
+        if (winnerContext?.uiid == 0) {
+            this.optionWinner = 0;
+        } else {
+            this.optionWinner = winnerContext?.uiid || 10;
+        }
     }
 
     // Found this option to shuffle an array on StackOverflow, works like a charm!
