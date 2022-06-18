@@ -6,6 +6,7 @@ import { WaitingDialog } from './waitingdialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TimerService } from '../service/timer.services';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { throwToolbarMixedModesError } from '@angular/material/toolbar';
 
 export interface VoteDataObject {
   player: string,
@@ -43,46 +44,9 @@ export class VoteComponent {
     ) {
         // For quick testing, if left empty, fill with junk values.
         if (store.getVotingState() == undefined) {
-            // this.quit();
-
-            // Add junk data for testing for now.
-            let testVotingState = {
-                sessieid: "S4NT4",
-                player1_name: "Santa Clause",
-                player1_madlib: "This is something jolly.",
-                player1_id: "1",
-                player1_voteable: "true",
-                player2_name: "Donner",
-                player2_madlib: "This is something funny.",
-                player2_id: "2",
-                player2_voteable: "true",
-                player3_name: "Blitzen",
-                player3_madlib: "This is something hilarious.",
-                player3_id: "3",
-                player3_voteable: "true",
-                player4_name: "Dasher",
-                player4_madlib: "This is something kind of good.",
-                player4_id: "4",
-                player4_voteable: "false",
-                player5_name: "Dancer",
-                player5_madlib: "This is something mediocre.",
-                player5_id: "5",
-                player5_voteable: "true",
-                player6_name: "Comet",
-                player6_madlib: "This is something that should be weaponized.",
-                player6_id: "6",
-                player6_voteable: "false"
-                // player6_name: "",
-                // player6_madlib: "",
-                // player6_id: "",
-                // player6_voteable: ""
-            }
-            this.store.setPlayerName("Santa Clause");
-            this.votingData = this.convertVotingJSONtoUIObjects(testVotingState);
-        } else {
-            // Grab data from the form.
-            this.votingData = this.convertVotingJSONtoUIObjects(store.getVotingState());
+            this.quit();
         }
+        this.votingData = this.convertVotingJSONtoUIObjects(store.getVotingState());
     }
 
     // Event: onInit append. Do last minute updates to UI elements, store what is needed and display.
@@ -90,19 +54,26 @@ export class VoteComponent {
         // Get data for display:
         this.footer_message = this.store.MAD_LIBS_FOOTER;
 
-        // Start a 30 second timer
-        this.timer.setClock(30);
-        this.timer.timerCountdown();
-        this.timer.timerDone.subscribe(() => {
-            this.onVote({
-                disabled: "true",
-                id: "null",
-                madlib: "",
-                name: "",
-                player: "",
-                uiid: -1
+        let elligibleVotes = this.votingData.filter((property) => {
+            return property.disabled == "false";
+        }).length > 0;
+        if (!elligibleVotes) {
+            this.nullVote();
+        } else {
+            // Start a 30 second timer
+            this.timer.setClock(30);
+            this.timer.timerCountdown();
+            this.timer.timerDone.subscribe(() => {
+                this.onVote({
+                    disabled: "true",
+                    id: "null",
+                    madlib: "",
+                    name: "",
+                    player: "",
+                    uiid: -1
+                });
             });
-        });
+        }
     }
 
     // Convert the current voting state json into a list useable by the html.
@@ -196,16 +167,25 @@ export class VoteComponent {
             items++;
         });
 
-        if (votingDataTemp.length == 1) {
-            this.onVote(votingDataTemp[0]);
-        }
-
         return votingDataTemp;
     }
 
     // Return the user to the main screen.
     quit() {
         this.router.navigate([ '' ]);
+    }
+
+    // Vote for yourself, since there were no viable other options.
+    nullVote() {
+        this.optionWinner = 10;
+        this.onVote({
+            disabled: "true",
+            id: this.store.getPlayerId(),
+            madlib: "",
+            name: this.store.getPlayerName(),
+            player: "player1",
+            uiid: 0
+        });
     }
 
     // When the next button is pressed, the game should put in a request for the sessions mad lib.
@@ -232,9 +212,11 @@ export class VoteComponent {
         // Make the vote icon visible.
         this.optionSelected = context.uiid;
 
-        this.votingData.forEach((item) => {
-            item.disabled = "true"
-        });
+        if (this.votingData.length > 1) {
+            this.votingData.forEach((item) => {
+                item.disabled = "true"
+            });
+        }
 
         // API call to submit vote, then show result.
         if (this.timer.isTimerSet()) {

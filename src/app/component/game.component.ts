@@ -56,29 +56,6 @@ export class GameComponent {
     // For quick testing, if left empty, fill with junk values.
     if (this.gameData == undefined) {
       this.quit();
-
-      // this.gameData = {
-      //   "sessieid": "G4M3T",
-      //   "player_1_name": "Test_1",
-      //   "player_1_score": 1,
-      //   "player_1_id": "TEST1",
-      //   "player_2_name": "Test_2",
-      //   "player_2_score": 2,
-      //   "player_2_id": "TEST2",
-      //   "player_3_name": "Test_3",
-      //   "player_3_score": 3,
-      //   "player_3_id": "TEST3",
-      //   "player_4_name": "Test_4",
-      //   "player_4_score": 4,
-      //   "player_4_id": "TEST4",
-      //   "player_5_name": "Test_5",
-      //   "player_5_score": 5,
-      //   "player_5_id": "TEST5",
-      //   "player_6_name": "Test_6",
-      //   "player_6_score": 6,
-      //   "player_6_id": "TEST6",
-      //   "sessieTimer": 0
-      // }
     }
   }
 
@@ -107,6 +84,7 @@ export class GameComponent {
     this.convertMadLibJSONtoUIObjects(this.store.getGameMadLib());
 
     // Start the clock.
+    this.store.setTimeLimit(this.store.getGameState().sessieTimer);
     this.timer.setClock(this.store.getTimeLimit());
     this.timer.timerCountdown();
     this.timer.timerDone.subscribe(() => {
@@ -341,6 +319,7 @@ export class GameComponent {
     this.router.navigate([ '' ]);
   }
 
+  // When a word button is clicked, execute the following code.
   onWordClicked(category: string, word: string) {
     let categoryObject = this.madLibData.filter((item) => {
       return item.key == category;

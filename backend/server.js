@@ -69,7 +69,7 @@ app.get('/gamestate', (req, res) => {
             "player_6_name": "",
             "player_6_score": 0,
             "player_6_id": "",
-            "sessieTimer": request.sessieTimer
+            "sessieTimer": 30
         }
     }
 
@@ -168,11 +168,11 @@ app.get('/submit', (req, res) => {
             player2_name: "Test_player_2",
             player2_madlib: "This is something funny.",
             player2_id: "2",
-            player2_voteable: "true",
+            player2_voteable: "false",
             player3_name: "Test_player_3",
             player3_madlib: "This is something hilarious.",
             player3_id: "3",
-            player3_voteable: "true",
+            player3_voteable: "false",
             player4_name: "Test_player_4",
             player4_madlib: "This is something kind of good.",
             player4_id: "4",
@@ -180,7 +180,7 @@ app.get('/submit', (req, res) => {
             player5_name: "Test_player_5",
             player5_madlib: "This is something mediocre.",
             player5_id: "5",
-            player5_voteable: "true",
+            player5_voteable: "false",
             player6_name: "Test_player_6",
             player6_madlib: "This is something that should be weaponized.",
             player6_id: "6",
@@ -191,6 +191,36 @@ app.get('/submit', (req, res) => {
             error: "awaiting-submissions-error"
         };
     }
+
+    // let request = decipher(req);
+    
+    // responseJson = {
+    //     sessieid: request.sessieid,
+    //     player1_name: request.nickname,
+    //     player1_madlib: request.madlib,
+    //     player1_id: request.playerid,
+    //     player1_voteable: request.voteable,
+    //     player2_name: "",
+    //     player2_madlib: "",
+    //     player2_id: "",
+    //     player2_voteable: "",
+    //     player3_name: "",
+    //     player3_madlib: "",
+    //     player3_id: "",
+    //     player3_voteable: "",
+    //     player4_name: "",
+    //     player4_madlib: "",
+    //     player4_id: "",
+    //     player4_voteable: "",
+    //     player5_name: "",
+    //     player5_madlib: "",
+    //     player5_id: "",
+    //     player5_voteable: "",
+    //     player6_name: "",
+    //     player6_madlib: "",
+    //     player6_id: "",
+    //     player6_voteable: ""
+    // }
 
     res.json(responseJson);
 });
