@@ -52,7 +52,7 @@ export class LoginFormComponent {
         this.store.setPlayerName(this.loginForm.value.nickname);
         let transmitForm = this.loginForm.value;
         transmitForm["sessieTimer"] = this.store.getTimeLimit();
-        await this.api.postLogin(transmitForm).then((result) => {
+        await this.api.post(transmitForm, "login").then((result) => {
           this.store.setGameState(result);
         });
         this.router.navigate(['game']);

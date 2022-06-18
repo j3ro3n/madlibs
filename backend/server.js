@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 
 const cors = require('cors');
+const { response } = require('express');
 app.use(cors({
     origin: '*'
 }));
@@ -100,13 +101,50 @@ app.get('/madlib', (req, res) => {
                 ]
             }
         );
-    } else {
-        res.json(
-            { 
-                error: "Wrong request."
-            }
-        );
     }
+});
+
+app.get('/submit', (req, res) => {
+    let randomIfFinished = Math.floor(Math.random() * 20);
+    let responseJson = {};
+    
+    if (randomIfFinished > 3) {
+        let request = decipher(req);
+    
+        responseJson = {
+            sessieid: request.sessieid,
+            player1_name: request.nickname,
+            player1_madlib: request.madlib,
+            player1_id: request.playerid,
+            player1_voteable: request.voteable,
+            player2_name: "Donner",
+            player2_madlib: "This is something funny.",
+            player2_id: "2",
+            player2_voteable: "true",
+            player3_name: "Blitzen",
+            player3_madlib: "This is something hilarious.",
+            player3_id: "3",
+            player3_voteable: "true",
+            player4_name: "Dasher",
+            player4_madlib: "This is something kind of good.",
+            player4_id: "4",
+            player4_voteable: "false",
+            player5_name: "Dancer",
+            player5_madlib: "This is something mediocre.",
+            player5_id: "5",
+            player5_voteable: "true",
+            player6_name: "Comet",
+            player6_madlib: "This is something that should be weaponized.",
+            player6_id: "6",
+            player6_voteable: "false"
+        }
+    } else {
+        responseJson = {
+            error: "awaiting-submissions-error"
+        };
+    }
+
+    res.json(responseJson);
 });
 
 /*
