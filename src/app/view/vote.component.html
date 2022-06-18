@@ -1,0 +1,51 @@
+<!-- The title toolbar. -->
+<p>
+    <titleheader></titleheader>
+</p>
+
+<!-- Game content screen. More comments below to explain each segment. -->
+<p>
+    <mat-card>
+        <div class="row">
+            <!-- Timer bar, quit button and 'disabled button' showing session ID. -->
+            <div class="col-sm-12 col-md-12 col-lg-9 col-xl-9 pb-2">
+                <span *ngIf="timer.isTimerSet()"><span class="material-icons">timer</span><mat-progress-bar mode="determinate" value="{{timer.getTimePercent()}}"></mat-progress-bar></span>
+            </div>
+            <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
+                <button mat-stroked-button style="margin-right:5px" (click)="quit()">Quit</button>
+                <button mat-flat-button disabled><span style="color:white; align-items: center; font-size: x-large;">{{sessionID}}</span></button>
+            </div>
+        </div>
+        <hr/>
+        <div class="row">
+            <div class="col-sm-12 col-md-12 col-lg-11 col-xl-11">
+                <!-- Instructions for the screen. Nothing fancy here, since it's such a short instruction.-->
+                <p>Please click the button for the mad lib you found the funnniest. If an option can't be clicked, it is either your option or the player that submitted it ran out of time.</p>
+                <p>Vote now!</p>
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-1 col-xl-1 pt-1">
+                <mat-spinner [diameter]="35" *ngIf="(optionSelected !== -1) && (optionWinner == -1)" style="margin:0 auto;"></mat-spinner>
+            </div>
+        </div>
+        <hr/>
+        <div class="row" *ngFor="let vote of votingData; index as i">
+            <div class="col-11 mb-2">
+                <button mat-raised-button color="accent" class="w-100" disabled="{{vote.disabled}}" (click)="onVote(vote)" [ngStyle]="{'background-color': (optionWinner == vote.uiid) ? '#000' : ''}">{{vote.madlib}}</button>
+            </div>
+            <div class="col-1 pl-0 pt-1">
+                <span class="material-icons" style="color:aquamarine" *ngIf="optionSelected == i">thumb_up_off</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <!-- Show the end button. -->
+                <button mat-raised-button color="primary" disabled='{{optionWinner == -1}}' class="w-100" (click)="onNext()">Next</button>
+            </div>
+        </div>
+
+        <!-- This is a nice footer. -->
+        <mat-card-footer>
+            <sub>{{footer_message}}</sub>
+        </mat-card-footer>
+    </mat-card>
+</p>

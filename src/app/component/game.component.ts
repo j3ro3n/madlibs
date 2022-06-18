@@ -29,8 +29,9 @@ export interface MadLibDataObject {
 })
 export class GameComponent {
   // Local properties for display.
-  formData : any;
-  formDataKeys : any[] = [];
+  gameData : any;
+  gameDataKeys : any[] = [];
+  
   madLibData : MadLibDataObject[] = [];
   madLibChoices : any = {};
   madLibSentence : string = "";
@@ -50,30 +51,11 @@ export class GameComponent {
     private snackBar: MatSnackBar
   ) {
     // Grab data from the form.
-    this.formData = store.getGameState();
+    this.gameData = store.getGameState();
 
     // For quick testing, if left empty, fill with junk values.
-    if (this.formData == undefined) {
-      // TODO: Uncomment this
-      // this.quit();
-      
-      // TODO: Delete this.
-      this.formData = {
-        "sessieid": "12345",
-        "player_1_name": "Santa Clause",
-        "player_1_score": "12",
-        "player_2_name": "Donner",
-        "player_2_score": "6",
-        "player_3_name": "Blitzen",
-        "player_3_score": "2",
-        "player_4_name": "Dasher",
-        "player_4_score": "10",
-        "player_5_name": "Dancer",
-        "player_5_score": "9",
-        "player_6_name": "Comet",
-        "player_6_score": "23"
-      }
-      this.store.setPlayerName("Blitzen");
+    if (this.gameData == undefined) {
+      this.quit();
     }
   }
 
@@ -84,20 +66,26 @@ export class GameComponent {
     this.footer_message = this.store.MAD_LIBS_FOOTER;
 
     // Update the player list.
-    this.convertPlayerList();
+    this.convertGameJSONtoUIObjects();
 
     // Get the current Mad lib and store it.
-    let sessionID = this.formData.sessieid;
-    await this.api.postMadLib({
-      sessieid: sessionID,
-      request: "mad lib"
-    }).then((result) => {
-      this.store.setGameMadLib(result);
-    });
-    this.convertMadLibData(this.store.getGameMadLib());
+    let sessionID = this.gameData.sessieid;
+    try {
+      // Get the current Mad Lib from the server.
+      await this.api.post({
+        sessieid: sessionID,
+        request: "mad lib"
+      }, "madlib").then((result) => {
+        this.store.setGameMadLib(result);
+      });
+    } catch(exception) {
+      let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+    }
+    this.convertMadLibJSONtoUIObjects(this.store.getGameMadLib());
 
     // Start the clock.
-    this.timer.setClock(this.store.getTimeLimit(), this.store.getTimeLimit());
+    this.store.setTimeLimit(this.store.getGameState().sessieTimer);
+    this.timer.setClock(this.store.getTimeLimit());
     this.timer.timerCountdown();
     this.timer.timerDone.subscribe(() => {
       if (!this.submitted) {
@@ -223,54 +211,62 @@ export class GameComponent {
     return (substitute_words.length-1 == madLibChoicesTrueLength);
   }
 
-  // Convert the original Mad Lib json into a word list useable by the html.
-  convertMadLibData(convMadLibData : any) {
-    this.madLibSentence = convMadLibData.madlib;
-    let madLibDataTemp = Object.keys(convMadLibData).filter(prop => {
-      return prop !== "madlib";
-    });
-    madLibDataTemp.forEach(item => {
-      let categoryArray = convMadLibData[item];
-      categoryArray.forEach((context: any) => {
-        let word1 = item + "_1";
-        let word2 = item + "_2";
-        let word3 = item + "_3";
-        let word4 = item + "_4";
-
-        this.madLibData.push({
-          key: item + ' ' + context.id,
-          category: item.toUpperCase(),
-          word1: context[word1],
-          word1color: "",
-          word2: context[word2],
-          word2color: "",
-          word3: context[word3],
-          word3color: "",
-          word4: context[word4],
-          word4color: ""
-        });
-      });
-    });
-  }
-
   // Convert the current game state json into a player list useable by the html.
-  convertPlayerList() {
-    let formDataTemp = Object.keys(this.formData).filter(prop => {
-      return prop !== "sessieid" && prop.indexOf("score") < 0
+  convertGameJSONtoUIObjects() {
+    let gameDataTemp = Object.keys(this.gameData).filter(prop => {
+      return prop !== "sessieid" 
+        && prop.indexOf("score") < 0 
+        && prop.indexOf("_id") < 0
+        && prop !== "sessieTimer"
     });
-    formDataTemp.forEach(item => {
+    
+    gameDataTemp.forEach(item => {
       let name = item.indexOf("_name") > 0 
         ? item.substring(0, item.length-5).concat("_name") 
         : item;
       let score = item.indexOf("_name") > 0
         ? item.substring(0, item.length-5).concat("_score")
         : item.concat("_score");
+      let id = item.indexOf("_name") > 0
+        ? item.substring(0, item.length-5).concat("_id")
+        : item.concat("_id");
       
-      this.formDataKeys.push(
-        { 
-          "name": name,
-          "score": score
+      if (this.gameData[item] !== '') {
+        this.gameDataKeys.push(
+          { 
+            "name": name,
+            "score": score,
+            "id": id
+          });
+      }
+    });
+
+    this.store.setPlayerId(this.gameData[this.gameDataKeys[this.gameDataKeys.length-1].id]);
+  }
+
+  // Convert the original Mad Lib json into a word list useable by the html.
+  convertMadLibJSONtoUIObjects(convMadLibData : any) {
+    this.madLibSentence = convMadLibData.madlib;
+    
+    let madLibDataTemp = convMadLibData.categories;
+        
+    madLibDataTemp.forEach((category : any) => {
+      let categoryName = category.type;
+      
+      category.words.forEach((option : any) => {
+        this.madLibData.push({
+          key: categoryName + ' ' + option.id,
+          category: categoryName.toUpperCase(),
+          word1: option.word_1,
+          word1color: "",
+          word2: option.word_2,
+          word2color: "",
+          word3: option.word_3,
+          word3color: "",
+          word4: option.word_4,
+          word4color: ""
         });
+      });
     });
   }
 
@@ -323,6 +319,7 @@ export class GameComponent {
     this.router.navigate([ '' ]);
   }
 
+  // When a word button is clicked, execute the following code.
   onWordClicked(category: string, word: string) {
     let categoryObject = this.madLibData.filter((item) => {
       return item.key == category;
@@ -374,7 +371,7 @@ export class GameComponent {
   }
 
   // Create and submit the finished Mad Lib.
-  submitMadLib(voteable: boolean = true) {
+  async submitMadLib(voteable: boolean = true) {
     // If the amount of answers given does not equal one less than the parts to be replaced,
     // show a snackbar. Otherwise, substitute for category words in mad lib.
     if (!this.answersAllGiven()) {
@@ -402,7 +399,6 @@ export class GameComponent {
       });
 
       // Console log the resulting mad lib.
-      // TODO: Replace with API call to send in this madlib.
       const dialogRef = this.waitingDialog.open(WaitingDialog, {
         width: '250px',
         data: {
@@ -412,7 +408,32 @@ export class GameComponent {
       });
       dialogRef.disableClose = true;
       
-      console.log(finishedMadLib + " > voteable: " + voteable);
+      let votingStateObject = {
+        error: "awaiting-submissions-error"
+      };
+      while (votingStateObject.error !== undefined) {
+        // Wait for one second between requests.
+        await new Promise(f => setTimeout(f, 1000));
+        
+        try {
+          // Request the voting state.
+          await this.api.post({
+            sessieid: this.gameData.sessieid,
+            nickname: this.store.getPlayerName(),
+            playerid: this.store.getPlayerId(),
+            madlib: finishedMadLib,
+            voteable: voteable
+          }, "submit").then((result: any) => {
+            votingStateObject = result;
+          });
+        } catch(exception) {
+          let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+        }
+      }
+
+      this.store.setVotingState(votingStateObject);
+      dialogRef.close();
+      this.router.navigate([ "vote" ]);
     }
   }
 }

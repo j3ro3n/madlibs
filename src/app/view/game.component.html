@@ -9,11 +9,11 @@
         <div class="row">
             <!-- Timer bar, quit button and 'disabled button' showing session ID. -->
             <div class="col-sm-12 col-md-12 col-lg-9 col-xl-9 pb-2">
-                <span *ngIf="timer.getTimerSet()"><span class="material-icons">timer</span><mat-progress-bar mode="determinate" value="{{timer.getTimePercent()}}"></mat-progress-bar></span>
+                <span *ngIf="timer.isTimerSet()"><span class="material-icons">timer</span><mat-progress-bar mode="determinate" value="{{timer.getTimePercent()}}"></mat-progress-bar></span>
             </div>
             <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
                 <button mat-stroked-button style="margin-right:5px" (click)="quit()">Quit</button>
-                <button mat-flat-button disabled><span style="color:white; align-items: center; font-size: x-large;">{{formData.sessieid}}</span></button>
+                <button mat-flat-button disabled><span style="color:white; align-items: center; font-size: x-large;">{{gameData.sessieid}}</span></button>
             </div>
         </div>
         <div class="row py-4">
@@ -38,7 +38,7 @@
             <!-- Actual game component. -->
             <div class="col-sm-12 col-md-12 col-lg-1 col-xl-1">
                 <!-- Loop through all players and print their names and scores. -->
-                <div *ngFor="let key of formDataKeys" class="pt-2"><p><span matBadge="{{formData[key.score] || ''}}" matBadgePosition="before" matBadgeOverlap="false">{{formData[key.name] || ''}}</span></p></div>
+                <div *ngFor="let key of gameDataKeys" class="pt-2"><p><span matBadge="{{gameData[key.score] || ''}}" matBadgePosition="before" matBadgeOverlap="false">{{gameData[key.name] || ''}}</span></p></div>
             </div>
             <div class="col-sm-12 col-md-12 col-lg-10 col-xl-10">
                 <!-- Loop through all the mad lib options and display them on screen. -->

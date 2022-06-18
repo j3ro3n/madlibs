@@ -29,6 +29,10 @@ export class LoginFormComponent {
     ) {
     this.loginForm = new FormGroup({});
     this.footer_message = store.MAD_LIBS_FOOTER;
+
+    // Clear any persistant data from a previous login.
+    store.setPlayerId("");
+    store.setPlayerName("");
   }
 
   // Event: onInit append. Initiate the form.
@@ -51,8 +55,9 @@ export class LoginFormComponent {
       try {
         this.store.setPlayerName(this.loginForm.value.nickname);
         let transmitForm = this.loginForm.value;
+        transmitForm["playerid"] = "";
         transmitForm["sessieTimer"] = this.store.getTimeLimit();
-        await this.api.postLogin(transmitForm).then((result) => {
+        await this.api.post(transmitForm, "gamestate").then((result) => {
           this.store.setGameState(result);
         });
         this.router.navigate(['game']);
@@ -60,7 +65,7 @@ export class LoginFormComponent {
         let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
       }
     } else {
-      let snackBarRef = this.snackBar.open("Please enter a nickname.", 'Sorry', { duration: 5000 });
+      let snackBarRef = this.snackBar.open("Please enter a nickname.", 'Alright', { duration: 5000 });
     }
   }
 

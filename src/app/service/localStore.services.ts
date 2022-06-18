@@ -7,7 +7,9 @@ import { Injectable } from '@angular/core';
 export class StoreService {
   // Stored properties
   private playerName : string = "";
+  private playerId : string = "";
   private gameState : any;
+  private votingState : any;
   private madLib : any;
   private timeLimit : number = 0;
 
@@ -36,14 +38,30 @@ export class StoreService {
     this.gameState = state;
   }
 
+  // Get the playerId given to the player at the start.
+  getPlayerId() {
+    return this.playerId;
+  }
+
+  // Set the playerId, or overwrite it if it was set already.
+  // Once set, don't change it with a new value, but allow it to be overwritten by a resetter.
+  setPlayerId(playerId: string) {
+    if (this.playerId == "" || playerId == ""){
+      this.playerId = playerId;
+    }
+  }
+
   // Get the nickname chosen at the start.
   getPlayerName() {
     return this.playerName;
   }
 
   // At the start, set the player name for this player.
+  // Once set, don't change it with a new value, but allow it to be overwritten by a resetter.
   setPlayerName(name: string) {
-    this.playerName = name;
+    if (this.playerId == "" || name == ""){
+      this.playerName = name;
+    }
   }
 
   // Get the current time limit.
@@ -54,5 +72,16 @@ export class StoreService {
   // Update/set the current time limit.
   setTimeLimit(newLimit : number) {
     this.timeLimit = newLimit;
+  }
+
+  // Get the current state of the Votes that may be cast.
+  // Note: These are not the counted votes but **the madlibs that may be voted on**.
+  getVotingState() {
+    return this.votingState;
+  }
+
+  // Update/set the current voting state.
+  setVotingState(state : any) {
+    this.votingState = state;
   }
 }

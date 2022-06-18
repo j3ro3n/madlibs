@@ -8,6 +8,7 @@ import { GameComponent } from './component/game.component';
 import { LoginFormComponent } from './component/loginForm.component';
 import { TitleHeaderComponent } from './component/titleheader.component';
 import { TimerSetDialog } from './component/settimerdialog.component';
+import { VoteComponent } from './component/voting.component';
 import { WaitingDialog } from './component/waitingdialog.component';
 
 import { ApiService } from './service/api.services';
@@ -48,6 +49,7 @@ import { TimerService } from './service/timer.services';
     LoginFormComponent,
     TimerSetDialog,
     TitleHeaderComponent,
+    VoteComponent,
     WaitingDialog
   ],
   imports: [
