@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, isDevMode } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 /*
@@ -7,8 +7,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 @Injectable()
 export class ApiService {
   // The url at which the API is listening.
-  readonly CONNECTOR = 'http://localhost:1234/';
-  // readonly CONNECTOR = "http://madderlibs.koreacentral.azurecontainer.io/MadderLibsAPI/";
+  readonly CONNECTOR = isDevMode() ? 
+    'http://localhost:1234/': 
+    "http://madderlibs.koreacentral.azurecontainer.io/MadderLibsAPI/";
   
   // Constructor
   constructor(private http: HttpClient) { }

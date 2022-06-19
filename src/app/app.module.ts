@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, enableProdMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 
@@ -85,4 +85,10 @@ import { TimerService } from './service/timer.services';
     AppComponent
   ]
 })
-export class AppModule { }
+export class AppModule {
+  constructor() {
+    if (location.hostname !== "localhost") {
+      enableProdMode();
+    }
+  }
+}
