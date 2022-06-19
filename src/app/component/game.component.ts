@@ -47,6 +47,7 @@ export class GameComponent {
 
   shuffleModeOn : boolean = false;
   shuffleColor : string = "accent";
+  shuffleCost : number;
 
   endButtonText: string = "";
   footer_message: string = "";
@@ -69,6 +70,10 @@ export class GameComponent {
     if (this.gameData == undefined) {
       this.quit();
     }
+
+    // Re-initialize the cost number for shuffling at the start of each round.
+    // (ie. every time this component is constructed)
+    this.shuffleCost = -1;
   }
 
   // Event: onInit append. Do last minute updates to UI elements, store what is needed and display.
@@ -113,12 +118,11 @@ export class GameComponent {
           if (!this.timer.isTimerSet() && this.store.getTimeLimit() > 0) {
             this.startTimer();
           }
-          console.log(result);
         });
       } catch(exception) {
         let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
       }
-      
+
       // Update the player list.
       this.convertGameJSONtoUIObjects();
     }, 3000);
@@ -394,13 +398,15 @@ export class GameComponent {
           sessieid: this.gameData.sessieid,
           playerid: this.store.getPlayerId(),
           category: categoryType,
-          score: 0
+          score: this.shuffleCost
         }, "shuffle").then((result: any) => {
           newWords = result;
         });
       } catch(exception) {
         let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
       }
+
+      this.shuffleCost--;
       
       // Get the current context for the item we want to change.
       let context = this.madLibData.filter((item) => {
