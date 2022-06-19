@@ -49,12 +49,16 @@
                             <div class="col-sm-12 col-md-12 col-lg-9 col-xl-9">
                                 <div class="row">
                                     <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 pb-3 pt-2 button-row">
-                                        <button mat-raised-button class="w-50" color="{{madLibData[i].word1color}}" (click)="onWordClicked(madLibData[i].key, madLibData[i].word1); input.value = '';">{{madLibData[i].word1 |titlecase}}</button>
-                                        <button mat-raised-button class="w-50" color="{{madLibData[i].word2color}}" (click)="onWordClicked(madLibData[i].key, madLibData[i].word2); input.value = '';">{{madLibData[i].word2 |titlecase}}</button>
+                                        <button *ngIf="!reportModeOn" mat-raised-button class="w-50" color="{{madLibData[i].word1color}}" (click)="onWordClicked(madLibData[i].key, madLibData[i].word1); input.value = '';">{{madLibData[i].word1 |titlecase}}</button>
+                                        <button *ngIf="!reportModeOn" mat-raised-button class="w-50" color="{{madLibData[i].word2color}}" (click)="onWordClicked(madLibData[i].key, madLibData[i].word2); input.value = '';">{{madLibData[i].word2 |titlecase}}</button>
+                                        <button *ngIf="reportModeOn" mat-stroked-button class="w-50" color="warn" (click)="onWordReport(madLibData[i], 'word1')">{{madLibData[i].word1 |titlecase}}</button>
+                                        <button *ngIf="reportModeOn" mat-stroked-button class="w-50" color="warn" (click)="onWordReport(madLibData[i], 'word2')">{{madLibData[i].word2 |titlecase}}</button>
                                     </div>
                                     <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 pb-3 pt-2 button-row">
-                                        <button mat-raised-button class="w-50" color="{{madLibData[i].word3color}}" (click)="onWordClicked(madLibData[i].key, madLibData[i].word3); input.value = '';">{{madLibData[i].word3 |titlecase}}</button>
-                                        <button mat-raised-button class="w-50" color="{{madLibData[i].word4color}}" (click)="onWordClicked(madLibData[i].key, madLibData[i].word4); input.value = '';">{{madLibData[i].word4 |titlecase}}</button>
+                                        <button *ngIf="!reportModeOn" mat-raised-button class="w-50" color="{{madLibData[i].word3color}}" (click)="onWordClicked(madLibData[i].key, madLibData[i].word3); input.value = '';">{{madLibData[i].word3 |titlecase}}</button>
+                                        <button *ngIf="!reportModeOn" mat-raised-button class="w-50" color="{{madLibData[i].word4color}}" (click)="onWordClicked(madLibData[i].key, madLibData[i].word4); input.value = '';">{{madLibData[i].word4 |titlecase}}</button>
+                                        <button *ngIf="reportModeOn" mat-stroked-button class="w-50" color="warn" (click)="onWordReport(madLibData[i], 'word3')">{{madLibData[i].word3 |titlecase}}</button>
+                                        <button *ngIf="reportModeOn" mat-stroked-button class="w-50" color="warn" (click)="onWordReport(madLibData[i], 'word4')">{{madLibData[i].word4 |titlecase}}</button>
                                     </div>
                                 </div>
                             </div>
@@ -69,19 +73,31 @@
                     </div>
                 </div>
             </div>
-            <div class="col-1">
+            <div class="col-sm-12 col-md-12 col-lg-1 col-xl-1">
                 <!-- Show the shuffle and report buttons. -->
-                <p><button mat-mini-fab color="{{shuffleColor}}" title="Shuffle" (click)="refreshWords()">
-                    <span class="material-icons">cached</span>
-                </button></p>
-                <p><button mat-mini-fab color="accent" title="Report" (click)="reportWords()">
-                    <span class="material-icons">sms_failed</span>
-                </button></p>
+                <div class="row">
+                    <div class="col-6 col-lg-12 col-xl-12 pb-1">
+                        <button mat-mini-fab color="{{shuffleColor}}" style="margin:0 auto;" title="Shuffle" (click)="refreshWords()">
+                            <span class="material-icons">cached</span>
+                        </button>
+                    </div>
+                    <div class="col-6 col-lg-12 col-xl-12">
+                        <button mat-mini-fab color="{{reportColor}}" style="margin:0 auto;" title="Report" (click)="reportWords()">
+                            <span class="material-icons">sms_failed</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
         <hr/>
+        <div class="row pb-4">
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                <span *ngIf="reportModeOn"><p>You are in report mode!</p></span>
+                <span *ngIf="shuffleModeOn"><p>You are in shuffle mode!</p></span>
+            </div>
+        </div>
         <div class="row">
-            <div class="col-12">
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                 <!-- Show the end button. -->
                 <button mat-raised-button color="primary" class="w-100" (click)="submitMadLib()">{{endButtonText}}</button>
             </div>

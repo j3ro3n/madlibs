@@ -62,10 +62,10 @@ export class LoginFormComponent {
         });
         this.router.navigate(['game']);
       } catch(exception) {
-        let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+        this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
       }
     } else {
-      let snackBarRef = this.snackBar.open("Please enter a nickname.", 'Alright', { duration: 5000 });
+      this.snackBar.open("Please enter a nickname.", 'Alright', { duration: 5000 });
     }
   }
 

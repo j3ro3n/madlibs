@@ -69,7 +69,7 @@ app.get('/gamestate', (req, res) => {
             "player_6_name": "",
             "player_6_score": 0,
             "player_6_id": "",
-            "sessieTimer": 30
+            "sessieTimer": 0
         }
     }
 
@@ -250,6 +250,14 @@ app.get('/vote', (req, res) => {
     Mocked API request//response for receiving a new set of words.
 */
 app.get('/shuffle', (req, res) => {
+    let request = decipher(req);
+    res.json(getFourWords(request.category, 0));
+});
+
+/*
+    Mocked API request//response for receiving a new set of words.
+*/
+app.get('/report', (req, res) => {
     let request = decipher(req);
     res.json(getFourWords(request.category, 0));
 });

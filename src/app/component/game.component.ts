@@ -43,6 +43,9 @@ export class GameComponent {
 
   refreshPlayerInterval : any;
 
+  reportModeOn : boolean = false;
+  reportColor : string = "accent";
+
   submitted : boolean = false;
 
   shuffleModeOn : boolean = false;
@@ -96,7 +99,7 @@ export class GameComponent {
         this.store.setGameMadLib(result);
       });
     } catch(exception) {
-      let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+      this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
     }
     this.convertMadLibJSONtoUIObjects(this.store.getGameMadLib());
 
@@ -120,7 +123,7 @@ export class GameComponent {
           }
         });
       } catch(exception) {
-        let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+        this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
       }
 
       // Update the player list.
@@ -277,21 +280,11 @@ export class GameComponent {
     context.word4color = '';
 
     switch (button) {
-      case 1:
-        context.word1color = 'warn';
-      break;
-      case 2:
-        context.word2color = 'warn';
-      break;
-      case 3:
-        context.word3color = 'warn';
-      break;
-      case 4:
-        context.word4color = 'warn';
-      break;
-      default:
-        // Do nothing, leave all buttons uncolored.
-      break;
+      case 1: context.word1color = 'warn'; break;
+      case 2: context.word2color = 'warn'; break;
+      case 3: context.word3color = 'warn'; break;
+      case 4: context.word4color = 'warn'; break;
+      default: return;
     }
   }
   
@@ -301,6 +294,55 @@ export class GameComponent {
     this.router.navigate([ '' ]);
   }
 
+  // Report a word and remove it from the context. Finally, replace it with a new option.
+  async onWordReport(context: MadLibDataObject, wordReported: string) {
+    let ucCategory = context.category[0].toUpperCase() + context.category.substr(1).toLowerCase();
+    let wordsInContext = [
+      context.word1,
+      context.word2,
+      context.word3,
+      context.word4
+    ];
+    
+    let wordToReport = wordsInContext[parseInt(wordReported.substring(wordReported.length-1))-1];
+    
+    this.snackBar.open("Alright, we'll report that word and make sure it doesn't show up anymore in this session.", "Thanks", { duration: 10000 });
+
+    let newWords : string[] = [];
+    try {
+      // Request the voting state.
+      await this.api.post({
+        sessieid: this.store.getGameState().sessieid,
+        category: ucCategory,
+        word: wordToReport
+      }, "report").then((result: any) => {
+        console.log(result);
+        newWords = [
+          result.word_1,
+          result.word_2,
+          result.word_3,
+          result.word_4
+        ];
+      });
+    } catch(exception) {
+      this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+    }
+
+    newWords = newWords.filter((word: string) => {
+      return !wordsInContext.includes(word);
+    });
+
+    switch(wordReported) {
+      case "word1": context.word1 = newWords[0]; break;
+      case "word2": context.word2 = newWords[0]; break;
+      case "word3": context.word3 = newWords[0]; break;
+      case "word4": context.word4 = newWords[0]; break;
+      default: return;
+    }
+
+    this.reportWords();
+  }
+
   // When a word button is clicked, execute the following code.
   onWordClicked(category: string, word: string) {
     let categoryObject = this.madLibData.filter((item) => {
@@ -308,16 +350,11 @@ export class GameComponent {
     })[0];
     let categoryWord = Object.keys(categoryObject).filter((itemKey) => {
       switch (itemKey) {
-        case "word1":
-          return categoryObject.word1 == word;
-        case "word2":
-          return categoryObject.word2 == word;
-        case "word3":
-          return categoryObject.word3 == word;
-        case "word4":
-          return categoryObject.word4 == word;
-        default:
-          return false;
+        case "word1": return categoryObject.word1 == word;
+        case "word2": return categoryObject.word2 == word;
+        case "word3": return categoryObject.word3 == word;
+        case "word4": return categoryObject.word4 == word;
+        default: return false;
       }
     })[0];
     
@@ -403,7 +440,7 @@ export class GameComponent {
           newWords = result;
         });
       } catch(exception) {
-        let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+        this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
       }
 
       this.shuffleCost--;
@@ -423,22 +460,20 @@ export class GameComponent {
       context.word3 = newWords.word_3;
       context.word4 = newWords.word_4;
     }
+
+    this.refreshWords();
   }
 
   // 'Shuffle' functionality. Refresh the words to use different words. 
   refreshWords() {
     this.shuffleModeOn = !this.shuffleModeOn;
-    if (this.shuffleColor == "accent") {
-      this.shuffleColor = "warn";
-    } else {
-      this.shuffleColor = "accent";
-    }
+    this.shuffleColor = this.shuffleColor == "accent" ? "warn" : "accent";
   }
 
   // 'Report' functionality. Report words and make them go away.
   reportWords() {
-    // TODO: WRITE REPORT FUNCTIONALITY
-    let snackBarRef = this.snackBar.open("Exception: NYI", 'Okay', { duration: 5000 });
+    this.reportModeOn = !this.reportModeOn;
+    this.reportColor = this.reportColor == "accent" ? "warn" : "accent";
   }
 
   // Start the timer, according to the first player's time limit set in the store.
@@ -519,7 +554,7 @@ export class GameComponent {
     // If the amount of answers given does not equal one less than the parts to be replaced,
     // show a snackbar. Otherwise, substitute for category words in mad lib.
     if (!this.answersAllGiven()) {
-      let snackBarRef = this.snackBar.open("You need to select/write a word for every category before submitting!", 'Oops!', { duration: 3000 });
+      this.snackBar.open("You need to select/write a word for every category before submitting!", 'Oops!', { duration: 3000 });
     } else {
       this.submitted = true;
 
@@ -540,7 +575,7 @@ export class GameComponent {
               }
             });
           } catch(exception) {
-            let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+            this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
           }
         });
       }
@@ -594,7 +629,7 @@ export class GameComponent {
             votingStateObject = result;
           });
         } catch(exception) {
-          let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+          this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
         }
       }
 
