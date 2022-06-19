@@ -202,7 +202,7 @@ export class VoteComponent {
             });
             this.router.navigate(['game']);
         } catch(exception) {
-            let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+            this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
         }
     }
 
@@ -241,7 +241,7 @@ export class VoteComponent {
                     votingResultStateObject = result;
                 });
             } catch(exception) {
-                let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+                this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
             }
         }
         

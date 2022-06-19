@@ -20,6 +20,11 @@ export interface MadLibDataObject {
   word4color: string
 }
 
+export interface CustomWord {
+  categorykey: string,
+  word: string
+}
+
 /*
   Component to contain the game functionality.
 */
@@ -36,10 +41,21 @@ export class GameComponent {
   madLibChoices : any = {};
   madLibSentence : string = "";
 
+  refreshPlayerInterval : any;
+
+  reportModeOn : boolean = false;
+  reportColor : string = "accent";
+
   submitted : boolean = false;
+
+  shuffleModeOn : boolean = false;
+  shuffleColor : string = "accent";
+  shuffleCost : number;
 
   endButtonText: string = "";
   footer_message: string = "";
+
+  customWords : CustomWord[] = [];
 
   // Constructor
   constructor(
@@ -57,6 +73,10 @@ export class GameComponent {
     if (this.gameData == undefined) {
       this.quit();
     }
+
+    // Re-initialize the cost number for shuffling at the start of each round.
+    // (ie. every time this component is constructed)
+    this.shuffleCost = -1;
   }
 
   // Event: onInit append. Do last minute updates to UI elements, store what is needed and display.
@@ -79,81 +99,36 @@ export class GameComponent {
         this.store.setGameMadLib(result);
       });
     } catch(exception) {
-      let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+      this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
     }
     this.convertMadLibJSONtoUIObjects(this.store.getGameMadLib());
 
     // Start the clock.
     this.store.setTimeLimit(this.store.getGameState().sessieTimer);
-    this.timer.setClock(this.store.getTimeLimit());
-    this.timer.timerCountdown();
-    this.timer.timerDone.subscribe(() => {
-      if (!this.submitted) {
-        if (this.answersAllGiven()) {
-          this.submitMadLib();
-        } else {
-          let allCategories: any[] = []
-          for (let index = 0; index < this.madLibData.length; index ++) {
-            allCategories.push({
-              key: this.madLibData[index].key,
-              category: this.madLibData[index].category,
-              mldi: index
-            });
+    this.startTimer();
+
+    // Start the refresh timer:
+    this.refreshPlayerInterval = setInterval(async () => {
+      try {
+        await this.api.post({
+          nickname: this.store.getPlayerName(),
+          playerid: this.store.getPlayerId(),
+          sessieid: sessionID,
+          sessieTimer: this.store.getTimeLimit()
+        }, "gamestate").then((result) => {
+          this.store.setGameState(result);
+          this.store.setTimeLimit(this.store.getGameState().sessieTimer);
+          if (!this.timer.isTimerSet() && this.store.getTimeLimit() > 0) {
+            this.startTimer();
           }
-          for (let index = 0; index < allCategories.length; index ++) {
-            let result = this.madLibChoices[allCategories[index].category];
-            if (result !== undefined) {
-              let iResult = result.find((key: any) => {
-                return key.category == allCategories[index].key;
-              });
-              if (iResult !== undefined) {
-                allCategories.splice(index, 1);
-                index--;
-              }
-            }
-          };
-          
-          allCategories.forEach((categoryKey) => {
-             let randomNumber = Math.ceil(Math.random() * 4);
-            switch(randomNumber){
-              case 1:
-                this.addChoice(
-                  this.madLibData[categoryKey.mldi], 
-                  categoryKey.key,
-                  this.madLibData[categoryKey.mldi].word1
-                );
-              break;
-              case 2:
-                this.addChoice(
-                  this.madLibData[categoryKey.mldi], 
-                  categoryKey.key,
-                  this.madLibData[categoryKey.mldi].word2
-                );
-              break;
-              case 3:
-                this.addChoice(
-                  this.madLibData[categoryKey.mldi], 
-                  categoryKey.key,
-                  this.madLibData[categoryKey.mldi].word3
-                );
-              break;
-              case 4:
-                this.addChoice(
-                  this.madLibData[categoryKey.mldi], 
-                  categoryKey.key,
-                  this.madLibData[categoryKey.mldi].word4
-                );
-              break;
-              default:
-                // This is literally unreachable.
-              break;
-            }
-          });
-  
-          this.submitMadLib(false);
-        }
+        });
+      } catch(exception) {
+        this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
       }
-    });
+
+      // Update the player list.
+      this.convertGameJSONtoUIObjects();
+    }, 3000);
   }
 
   // Add a choice to prevent code redundancy
@@ -213,6 +188,15 @@ export class GameComponent {
 
   // Convert the current game state json into a player list useable by the html.
   convertGameJSONtoUIObjects() {
+    // Refresh the game data.
+    this.gameData = this.store.getGameState();
+
+    // Check if list was previously set. If so, reset.
+    if (this.gameDataKeys.length > 0) {
+      this.gameDataKeys = [];
+    }
+
+    // Fill player list and score.
     let gameDataTemp = Object.keys(this.gameData).filter(prop => {
       return prop !== "sessieid" 
         && prop.indexOf("score") < 0 
@@ -296,27 +280,67 @@ export class GameComponent {
     context.word4color = '';
 
     switch (button) {
-      case 1:
-        context.word1color = 'warn';
-      break;
-      case 2:
-        context.word2color = 'warn';
-      break;
-      case 3:
-        context.word3color = 'warn';
-      break;
-      case 4:
-        context.word4color = 'warn';
-      break;
-      default:
-        // Do nothing, leave all buttons uncolored.
-      break;
+      case 1: context.word1color = 'warn'; break;
+      case 2: context.word2color = 'warn'; break;
+      case 3: context.word3color = 'warn'; break;
+      case 4: context.word4color = 'warn'; break;
+      default: return;
     }
   }
   
   // Return the user to the main screen.
   quit() {
+    clearInterval(this.refreshPlayerInterval);
     this.router.navigate([ '' ]);
+  }
+
+  // Report a word and remove it from the context. Finally, replace it with a new option.
+  async onWordReport(context: MadLibDataObject, wordReported: string) {
+    let ucCategory = context.category[0].toUpperCase() + context.category.substr(1).toLowerCase();
+    let wordsInContext = [
+      context.word1,
+      context.word2,
+      context.word3,
+      context.word4
+    ];
+    
+    let wordToReport = wordsInContext[parseInt(wordReported.substring(wordReported.length-1))-1];
+    
+    this.snackBar.open("Alright, we'll report that word and make sure it doesn't show up anymore in this session.", "Thanks", { duration: 10000 });
+
+    let newWords : string[] = [];
+    try {
+      // Request the voting state.
+      await this.api.post({
+        sessieid: this.store.getGameState().sessieid,
+        category: ucCategory,
+        word: wordToReport
+      }, "report").then((result: any) => {
+        console.log(result);
+        newWords = [
+          result.word_1,
+          result.word_2,
+          result.word_3,
+          result.word_4
+        ];
+      });
+    } catch(exception) {
+      this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+    }
+
+    newWords = newWords.filter((word: string) => {
+      return !wordsInContext.includes(word);
+    });
+
+    switch(wordReported) {
+      case "word1": context.word1 = newWords[0]; break;
+      case "word2": context.word2 = newWords[0]; break;
+      case "word3": context.word3 = newWords[0]; break;
+      case "word4": context.word4 = newWords[0]; break;
+      default: return;
+    }
+
+    this.reportWords();
   }
 
   // When a word button is clicked, execute the following code.
@@ -326,28 +350,62 @@ export class GameComponent {
     })[0];
     let categoryWord = Object.keys(categoryObject).filter((itemKey) => {
       switch (itemKey) {
-        case "word1":
-          return categoryObject.word1 == word;
-        case "word2":
-          return categoryObject.word2 == word;
-        case "word3":
-          return categoryObject.word3 == word;
-        case "word4":
-          return categoryObject.word4 == word;
-        default:
-          return false;
+        case "word1": return categoryObject.word1 == word;
+        case "word2": return categoryObject.word2 == word;
+        case "word3": return categoryObject.word3 == word;
+        case "word4": return categoryObject.word4 == word;
+        default: return false;
       }
     })[0];
     
     // Use the highlighter to show pretty buttons.
     if (categoryWord == undefined) {
-      // No matching word was found. Unhighlight all buttons.
+      // No matching word was found. Custom input. Unhighlight all buttons. Save custom input to array.
+      if (this.customWords.filter((item) => {
+        return item.categorykey == categoryObject.key
+      })[0] == undefined) {
+        if (word.trim() !== "") {
+          this.customWords.push({
+            categorykey: categoryObject.key,
+            word: word
+          });
+        }
+      } else {
+        if (word.trim() !== "") {
+          this.customWords.filter((item) => {
+            return item.categorykey == categoryObject.key
+          })[0].word = word;
+        } else {
+          this.customWords
+            .splice(
+              this.customWords.indexOf(
+                this.customWords.filter((item) => {
+                  return item.categorykey == categoryObject.key
+                })[0]
+              ), 1
+            );
+        }
+      }
+      
       this.highlightButton(
         categoryObject,
         0
       );
     } else {
-      // A matching word was found. Highlight that buttons.
+      // A matching word was found. Highlight that button, also remove custom input if it existed.
+      if (this.customWords.filter((item) => {
+        return item.categorykey == categoryObject.key
+      })[0] !== undefined) {
+        this.customWords
+        .splice(
+          this.customWords.indexOf(
+            this.customWords.filter((item) => {
+              return item.categorykey == categoryObject.key
+            })[0]
+          ), 1
+        );
+      }
+
       this.highlightButton(
         categoryObject, 
         parseInt(categoryWord.substring(categoryWord.length-1, categoryWord.length))
@@ -358,16 +416,137 @@ export class GameComponent {
     this.addChoice(categoryObject, category, word);
   }
 
+  // Request four new words for a category.
+  async refreshCategory(categoryName : string) {
+    if (this.shuffleModeOn) {
+      let categoryType = categoryName.substring(0, categoryName.indexOf(' '));
+      let newWords = {
+        id: 0,
+        word_1: "",
+        word_2: "",
+        word_3: "",
+        word_4: ""
+      };
+
+      // API call goes here to get new values.
+      try {
+        // Request the voting state.
+        await this.api.post({
+          sessieid: this.gameData.sessieid,
+          playerid: this.store.getPlayerId(),
+          category: categoryType,
+          score: this.shuffleCost
+        }, "shuffle").then((result: any) => {
+          newWords = result;
+        });
+      } catch(exception) {
+        this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+      }
+
+      this.shuffleCost--;
+      
+      // Get the current context for the item we want to change.
+      let context = this.madLibData.filter((item) => {
+        return item.key == categoryName;
+      })[0];
+      // Reset all color for category
+      context.word1color = "";
+      context.word2color = "";
+      context.word3color = "";
+      context.word4color = "";
+      // Set the words to what was retrieved.
+      context.word1 = newWords.word_1;
+      context.word2 = newWords.word_2;
+      context.word3 = newWords.word_3;
+      context.word4 = newWords.word_4;
+    }
+
+    this.refreshWords();
+  }
+
   // 'Shuffle' functionality. Refresh the words to use different words. 
   refreshWords() {
-    // TODO: WRITE REFRESH FUNCTIONALITY
-    let snackBarRef = this.snackBar.open("Exception: NYI", 'Okay', { duration: 5000 });
+    this.shuffleModeOn = !this.shuffleModeOn;
+    this.shuffleColor = this.shuffleColor == "accent" ? "warn" : "accent";
   }
 
   // 'Report' functionality. Report words and make them go away.
   reportWords() {
-    // TODO: WRITE REPORT FUNCTIONALITY
-    let snackBarRef = this.snackBar.open("Exception: NYI", 'Okay', { duration: 5000 });
+    this.reportModeOn = !this.reportModeOn;
+    this.reportColor = this.reportColor == "accent" ? "warn" : "accent";
+  }
+
+  // Start the timer, according to the first player's time limit set in the store.
+  startTimer() {
+    this.timer.setClock(this.store.getTimeLimit());
+    this.timer.timerCountdown();
+    this.timer.timerDone.subscribe(() => {
+      if (!this.submitted) {
+        if (this.answersAllGiven()) {
+          this.submitMadLib();
+        } else {
+          let allCategories: any[] = []
+          for (let index = 0; index < this.madLibData.length; index ++) {
+            allCategories.push({
+              key: this.madLibData[index].key,
+              category: this.madLibData[index].category,
+              mldi: index
+            });
+          }
+          for (let index = 0; index < allCategories.length; index ++) {
+            let result = this.madLibChoices[allCategories[index].category];
+            if (result !== undefined) {
+              let iResult = result.find((key: any) => {
+                return key.category == allCategories[index].key;
+              });
+              if (iResult !== undefined) {
+                allCategories.splice(index, 1);
+                index--;
+              }
+            }
+          };
+          
+          allCategories.forEach((categoryKey) => {
+             let randomNumber = Math.ceil(Math.random() * 4);
+            switch(randomNumber){
+              case 1:
+                this.addChoice(
+                  this.madLibData[categoryKey.mldi], 
+                  categoryKey.key,
+                  this.madLibData[categoryKey.mldi].word1
+                );
+              break;
+              case 2:
+                this.addChoice(
+                  this.madLibData[categoryKey.mldi], 
+                  categoryKey.key,
+                  this.madLibData[categoryKey.mldi].word2
+                );
+              break;
+              case 3:
+                this.addChoice(
+                  this.madLibData[categoryKey.mldi], 
+                  categoryKey.key,
+                  this.madLibData[categoryKey.mldi].word3
+                );
+              break;
+              case 4:
+                this.addChoice(
+                  this.madLibData[categoryKey.mldi], 
+                  categoryKey.key,
+                  this.madLibData[categoryKey.mldi].word4
+                );
+              break;
+              default:
+                // This is literally unreachable.
+              break;
+            }
+          });
+  
+          this.submitMadLib(false);
+        }
+      }
+    });
   }
 
   // Create and submit the finished Mad Lib.
@@ -375,10 +554,33 @@ export class GameComponent {
     // If the amount of answers given does not equal one less than the parts to be replaced,
     // show a snackbar. Otherwise, substitute for category words in mad lib.
     if (!this.answersAllGiven()) {
-      let snackBarRef = this.snackBar.open("You need to select/write a word for every category before submitting!", 'Oops!', { duration: 3000 });
+      this.snackBar.open("You need to select/write a word for every category before submitting!", 'Oops!', { duration: 3000 });
     } else {
       this.submitted = true;
-      // Get all the parts to be replaced.
+
+      // Check if any words were custom filled and submit them to the API if they were.
+      if (this.customWords.length > 0) {
+        this.customWords.forEach((wordObject) => {
+          // Do API call to submit word
+          try {
+            // Request the voting state.
+            this.api.post({
+              category: wordObject.categorykey.split(' ')[0],
+              word: wordObject.word
+            }, "word").then((result: any) => {
+              if (result.result == "success") {
+                // If success of this action ever becomes important, do something here.
+              } else {
+                // If failure of this action ever becomes important, do something here.
+              }
+            });
+          } catch(exception) {
+            this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+          }
+        });
+      }
+
+      // Get all the parts to be replaced and replace them with category words to finish the mad lib.
       let substitute_words = this.madLibSentence.split('$');
       let finishedMadLib = "";
       substitute_words.forEach((partial) => {
@@ -427,12 +629,13 @@ export class GameComponent {
             votingStateObject = result;
           });
         } catch(exception) {
-          let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+          this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
         }
       }
 
       this.store.setVotingState(votingStateObject);
       dialogRef.close();
+      clearInterval(this.refreshPlayerInterval);
       this.router.navigate([ "vote" ]);
     }
   }

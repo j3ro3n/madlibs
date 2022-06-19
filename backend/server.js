@@ -69,7 +69,7 @@ app.get('/gamestate', (req, res) => {
             "player_6_name": "",
             "player_6_score": 0,
             "player_6_id": "",
-            "sessieTimer": 30
+            "sessieTimer": 0
         }
     }
 
@@ -245,6 +245,165 @@ app.get('/vote', (req, res) => {
 
     res.json(responseJson);
 });
+
+/*
+    Mocked API request//response for receiving a new set of words.
+*/
+app.get('/shuffle', (req, res) => {
+    let request = decipher(req);
+    res.json(getFourWords(request.category, 0));
+});
+
+/*
+    Mocked API request//response for receiving a new set of words.
+*/
+app.get('/report', (req, res) => {
+    let request = decipher(req);
+    res.json(getFourWords(request.category, 0));
+});
+
+/* 
+    Mocked API request//response for receiving new words to be saved.
+*/
+app.get('/word', (req, res) => {
+    let randomIfFinished = Math.floor(Math.random() * 20);
+    if (randomIfFinished > 10) {
+        res.json({
+            result: "failed"
+        });
+    } else {
+        res.json({
+            result: "success"
+        });
+    }
+});
+
+/*
+    Helper function to generate some pretend words.
+*/
+function getFourWords(category, id) {
+    let creatureArray = [
+        "Barbarian",
+        "Big Bad Wolf",
+        "Chocobo",
+        "Crab",
+        "Crane",
+        "Donald Trump",
+        "Gecko",
+        "Goblin",
+        "Homo sapiens",
+        "Jaguar",
+        "Joe Biden",
+        "Kabouter Plop",
+        "Kraken",
+        "Lion",
+        "Lynx",
+        "Moogle",
+        "Ninja",
+        "Samurai",
+        "T-Rex",
+        "Uruk-hai"
+    ];
+    let eventArray = [
+        "Babyshower",
+        "Bar crawl",
+        "Beach volley game",
+        "Birthday party",
+        "Chess tournament",
+        "Community Cleanup",
+        "Convention",
+        "F1 Race",
+        "Football game",
+        "Hackathon",
+        "High school prom",
+        "Lowlands festival",
+        "Market",
+        "Paddle game",
+        "Pinkpop festival",
+        "Pot luck",
+        "Public execution",
+        "Ren faire",
+        "School assessment",
+        "Sweet 16 party"
+    ];
+    let objectArray = [
+        "3D printer",
+        "Baseball Bat",
+        "Book",
+        "Car key",
+        "Cardboard box",
+        "Drinking bottle",
+        "Fineliner",
+        "Fridge",
+        "Headphones",
+        "Houseplant",
+        "Keyboard",
+        "Kitchen counter",
+        "Lighter",
+        "Microphone",
+        "Monitor",
+        "Pencil",
+        "Picture",
+        "Smartphone",
+        "Stepladder",
+        "Tissue"
+    ];
+    let substanceArray = [
+        "Alcohol",
+        "BBQ sauce",
+        "Beer",
+        "Cake",
+        "Cheese",
+        "Cookie dough",
+        "Honey",
+        "Iced tea",
+        "Mayonaise",
+        "Milk",
+        "Oil",
+        "Oregano",
+        "Peanut Butter",
+        "Pepper",
+        "Pie",
+        "Salt",
+        "Soy milk",
+        "Water",
+        "Whiskey",
+        "Wine"
+    ];
+
+    let useArray;
+    switch (category) {
+        case "Creature": useArray = creatureArray; break;
+        case "Event": useArray = eventArray; break;
+        case "Object": useArray = objectArray; break;
+        case "Substance": useArray = substanceArray; break;
+        default: return {};
+    }
+
+    let arrayKeys = [];
+    while (arrayKeys.length < 4) {
+
+        let randomNumber = Math.floor(Math.random() * useArray.length);
+
+        let goAhead = true;
+        for (let index = 0; index < arrayKeys.length; index++) {
+            if (arrayKeys[index] == randomNumber) {
+                goAhead = false;
+            }
+        }
+        if (goAhead) {
+            arrayKeys.push(randomNumber);
+        }
+    }
+
+    return {
+        "id": id,
+        "word_1": useArray[arrayKeys[0]],
+        "word_2": useArray[arrayKeys[1]],
+        "word_3": useArray[arrayKeys[2]],
+        "word_4": useArray[arrayKeys[3]]
+    };
+}
 
 /*
     Helper function to not have to type out the JSON.parse bit. For easier reading.
