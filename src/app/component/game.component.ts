@@ -94,6 +94,7 @@ export class GameComponent {
       // Get the current Mad Lib from the server.
       await this.api.post({
         sessieid: sessionID,
+        playerid: this.store.getPlayerId(),
         request: "mad lib"
       }, "madlib").then((result) => {
         this.store.setGameMadLib(result);
