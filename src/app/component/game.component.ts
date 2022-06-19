@@ -6,7 +6,6 @@ import { ApiService } from '../service/api.services';
 import { WaitingDialog } from './waitingdialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TimerService } from '../service/timer.services';
-import { throwToolbarMixedModesError } from '@angular/material/toolbar';
 
 export interface MadLibDataObject {
   key: string,
@@ -19,6 +18,11 @@ export interface MadLibDataObject {
   word3color: string,
   word4: string,
   word4color: string
+}
+
+export interface CustomWord {
+  categorykey: string,
+  word: string
 }
 
 /*
@@ -44,6 +48,8 @@ export class GameComponent {
 
   endButtonText: string = "";
   footer_message: string = "";
+
+  customWords : CustomWord[] = [];
 
   // Constructor
   constructor(
@@ -345,13 +351,52 @@ export class GameComponent {
     
     // Use the highlighter to show pretty buttons.
     if (categoryWord == undefined) {
-      // No matching word was found. Unhighlight all buttons.
+      // No matching word was found. Custom input. Unhighlight all buttons. Save custom input to array.
+      if (this.customWords.filter((item) => {
+        return item.categorykey == categoryObject.key
+      })[0] == undefined) {
+        if (word.trim() !== "") {
+          this.customWords.push({
+            categorykey: categoryObject.key,
+            word: word
+          });
+        }
+      } else {
+        if (word.trim() !== "") {
+          this.customWords.filter((item) => {
+            return item.categorykey == categoryObject.key
+          })[0].word = word;
+        } else {
+          this.customWords
+            .splice(
+              this.customWords.indexOf(
+                this.customWords.filter((item) => {
+                  return item.categorykey == categoryObject.key
+                })[0]
+              ), 1
+            );
+        }
+      }
+      
       this.highlightButton(
         categoryObject,
         0
       );
     } else {
-      // A matching word was found. Highlight that buttons.
+      // A matching word was found. Highlight that button, also remove custom input if it existed.
+      if (this.customWords.filter((item) => {
+        return item.categorykey == categoryObject.key
+      })[0] !== undefined) {
+        this.customWords
+        .splice(
+          this.customWords.indexOf(
+            this.customWords.filter((item) => {
+              return item.categorykey == categoryObject.key
+            })[0]
+          ), 1
+        );
+      }
+
       this.highlightButton(
         categoryObject, 
         parseInt(categoryWord.substring(categoryWord.length-1, categoryWord.length))
@@ -430,7 +475,30 @@ export class GameComponent {
       let snackBarRef = this.snackBar.open("You need to select/write a word for every category before submitting!", 'Oops!', { duration: 3000 });
     } else {
       this.submitted = true;
-      // Get all the parts to be replaced.
+
+      // Check if any words were custom filled and submit them to the API if they were.
+      if (this.customWords.length > 0) {
+        this.customWords.forEach((wordObject) => {
+          // Do API call to submit word
+          try {
+            // Request the voting state.
+            this.api.post({
+              category: wordObject.categorykey.split(' ')[0],
+              word: wordObject.word
+            }, "word").then((result: any) => {
+              if (result.result == "success") {
+                // If success of this action ever becomes important, do something here.
+              } else {
+                // If failure of this action ever becomes important, do something here.
+              }
+            });
+          } catch(exception) {
+            let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+          }
+        });
+      }
+
+      // Get all the parts to be replaced and replace them with category words to finish the mad lib.
       let substitute_words = this.madLibSentence.split('$');
       let finishedMadLib = "";
       substitute_words.forEach((partial) => {

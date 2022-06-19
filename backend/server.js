@@ -254,6 +254,22 @@ app.get('/shuffle', (req, res) => {
     res.json(getFourWords(request.category, 0));
 });
 
+/* 
+    Mocked API request//response for receiving new words to be saved.
+*/
+app.get('/word', (req, res) => {
+    let randomIfFinished = Math.floor(Math.random() * 20);
+    if (randomIfFinished > 10) {
+        res.json({
+            result: "failed"
+        });
+    } else {
+        res.json({
+            result: "success"
+        });
+    }
+});
+
 /*
     Helper function to generate some pretend words.
 */

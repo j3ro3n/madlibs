@@ -8,6 +8,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class ApiService {
   // The url at which the API is listening.
   readonly CONNECTOR = 'http://localhost:1234/';
+  // readonly CONNECTOR = "http://madderlibs.koreacentral.azurecontainer.io/MadderLibsAPI/";
   
   // Constructor
   constructor(private http: HttpClient) { }
