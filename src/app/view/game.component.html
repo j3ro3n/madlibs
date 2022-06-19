@@ -43,7 +43,7 @@
             <div class="col-sm-12 col-md-12 col-lg-10 col-xl-10">
                 <!-- Loop through all the mad lib options and display them on screen. -->
                 <div class="row" *ngFor="let key of madLibData; index as i">
-                    <div class="col-sm-12 col-md-12 col-lg-2 col-xl-2 pt-2 pb-1"><mat-chip-list><mat-chip class="w-100" selected color="accent">{{madLibData[i].key |titlecase}}</mat-chip></mat-chip-list></div>
+                    <div class="col-sm-12 col-md-12 col-lg-2 col-xl-2 pt-2 pb-1"><mat-chip-list><mat-chip class="w-100" selected color="{{shuffleColor}}" (click)="refreshCategory(madLibData[i].key)">{{madLibData[i].key |titlecase}}</mat-chip></mat-chip-list></div>
                     <div class="col-sm-12 col-md-12 col-lg-10 col-xl-10">
                         <div class="row">
                             <div class="col-sm-12 col-md-12 col-lg-9 col-xl-9">
@@ -71,7 +71,7 @@
             </div>
             <div class="col-1">
                 <!-- Show the shuffle and report buttons. -->
-                <p><button mat-mini-fab color="accent" title="Shuffle" (click)="refreshWords()">
+                <p><button mat-mini-fab color="{{shuffleColor}}" title="Shuffle" (click)="refreshWords()">
                     <span class="material-icons">cached</span>
                 </button></p>
                 <p><button mat-mini-fab color="accent" title="Report" (click)="reportWords()">

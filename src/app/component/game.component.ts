@@ -6,6 +6,7 @@ import { ApiService } from '../service/api.services';
 import { WaitingDialog } from './waitingdialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TimerService } from '../service/timer.services';
+import { throwToolbarMixedModesError } from '@angular/material/toolbar';
 
 export interface MadLibDataObject {
   key: string,
@@ -37,6 +38,9 @@ export class GameComponent {
   madLibSentence : string = "";
 
   submitted : boolean = false;
+
+  shuffleModeOn : boolean = false;
+  shuffleColor : string = "accent";
 
   endButtonText: string = "";
   footer_message: string = "";
@@ -358,10 +362,58 @@ export class GameComponent {
     this.addChoice(categoryObject, category, word);
   }
 
+  // Request four new words for a category.
+  async refreshCategory(categoryName : string) {
+    if (this.shuffleModeOn) {
+      let categoryType = categoryName.substring(0, categoryName.indexOf(' '));
+      let newWords = {
+        id: 0,
+        word_1: "",
+        word_2: "",
+        word_3: "",
+        word_4: ""
+      };
+
+      // API call goes here to get new values.
+      try {
+        // Request the voting state.
+        await this.api.post({
+          sessieid: this.gameData.sessieid,
+          playerid: this.store.getPlayerId(),
+          category: categoryType,
+          score: 0
+        }, "shuffle").then((result: any) => {
+          newWords = result;
+        });
+      } catch(exception) {
+        let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+      }
+      
+      // Get the current context for the item we want to change.
+      let context = this.madLibData.filter((item) => {
+        return item.key == categoryName;
+      })[0];
+      // Reset all color for category
+      context.word1color = "";
+      context.word2color = "";
+      context.word3color = "";
+      context.word4color = "";
+      // Set the words to what was retrieved.
+      context.word1 = newWords.word_1;
+      context.word2 = newWords.word_2;
+      context.word3 = newWords.word_3;
+      context.word4 = newWords.word_4;
+    }
+  }
+
   // 'Shuffle' functionality. Refresh the words to use different words. 
   refreshWords() {
-    // TODO: WRITE REFRESH FUNCTIONALITY
-    let snackBarRef = this.snackBar.open("Exception: NYI", 'Okay', { duration: 5000 });
+    this.shuffleModeOn = !this.shuffleModeOn;
+    if (this.shuffleColor == "accent") {
+      this.shuffleColor = "warn";
+    } else {
+      this.shuffleColor = "accent";
+    }
   }
 
   // 'Report' functionality. Report words and make them go away.
