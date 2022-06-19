@@ -41,6 +41,8 @@ export class GameComponent {
   madLibChoices : any = {};
   madLibSentence : string = "";
 
+  refreshPlayerInterval : any;
+
   submitted : boolean = false;
 
   shuffleModeOn : boolean = false;
@@ -95,75 +97,31 @@ export class GameComponent {
 
     // Start the clock.
     this.store.setTimeLimit(this.store.getGameState().sessieTimer);
-    this.timer.setClock(this.store.getTimeLimit());
-    this.timer.timerCountdown();
-    this.timer.timerDone.subscribe(() => {
-      if (!this.submitted) {
-        if (this.answersAllGiven()) {
-          this.submitMadLib();
-        } else {
-          let allCategories: any[] = []
-          for (let index = 0; index < this.madLibData.length; index ++) {
-            allCategories.push({
-              key: this.madLibData[index].key,
-              category: this.madLibData[index].category,
-              mldi: index
-            });
+    this.startTimer();
+
+    // Start the refresh timer:
+    this.refreshPlayerInterval = setInterval(async () => {
+      try {
+        await this.api.post({
+          nickname: this.store.getPlayerName(),
+          playerid: this.store.getPlayerId(),
+          sessieid: sessionID,
+          sessieTimer: this.store.getTimeLimit()
+        }, "gamestate").then((result) => {
+          this.store.setGameState(result);
+          this.store.setTimeLimit(this.store.getGameState().sessieTimer);
+          if (!this.timer.isTimerSet() && this.store.getTimeLimit() > 0) {
+            this.startTimer();
           }
-          for (let index = 0; index < allCategories.length; index ++) {
-            let result = this.madLibChoices[allCategories[index].category];
-            if (result !== undefined) {
-              let iResult = result.find((key: any) => {
-                return key.category == allCategories[index].key;
-              });
-              if (iResult !== undefined) {
-                allCategories.splice(index, 1);
-                index--;
-              }
-            }
-          };
-          
-          allCategories.forEach((categoryKey) => {
-             let randomNumber = Math.ceil(Math.random() * 4);
-            switch(randomNumber){
-              case 1:
-                this.addChoice(
-                  this.madLibData[categoryKey.mldi], 
-                  categoryKey.key,
-                  this.madLibData[categoryKey.mldi].word1
-                );
-              break;
-              case 2:
-                this.addChoice(
-                  this.madLibData[categoryKey.mldi], 
-                  categoryKey.key,
-                  this.madLibData[categoryKey.mldi].word2
-                );
-              break;
-              case 3:
-                this.addChoice(
-                  this.madLibData[categoryKey.mldi], 
-                  categoryKey.key,
-                  this.madLibData[categoryKey.mldi].word3
-                );
-              break;
-              case 4:
-                this.addChoice(
-                  this.madLibData[categoryKey.mldi], 
-                  categoryKey.key,
-                  this.madLibData[categoryKey.mldi].word4
-                );
-              break;
-              default:
-                // This is literally unreachable.
-              break;
-            }
-          });
-  
-          this.submitMadLib(false);
-        }
+          console.log(result);
+        });
+      } catch(exception) {
+        let snackBarRef = this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
       }
-    });
+      
+      // Update the player list.
+      this.convertGameJSONtoUIObjects();
+    }, 3000);
   }
 
   // Add a choice to prevent code redundancy
@@ -223,6 +181,15 @@ export class GameComponent {
 
   // Convert the current game state json into a player list useable by the html.
   convertGameJSONtoUIObjects() {
+    // Refresh the game data.
+    this.gameData = this.store.getGameState();
+
+    // Check if list was previously set. If so, reset.
+    if (this.gameDataKeys.length > 0) {
+      this.gameDataKeys = [];
+    }
+
+    // Fill player list and score.
     let gameDataTemp = Object.keys(this.gameData).filter(prop => {
       return prop !== "sessieid" 
         && prop.indexOf("score") < 0 
@@ -326,6 +293,7 @@ export class GameComponent {
   
   // Return the user to the main screen.
   quit() {
+    clearInterval(this.refreshPlayerInterval);
     this.router.navigate([ '' ]);
   }
 
@@ -467,6 +435,79 @@ export class GameComponent {
     let snackBarRef = this.snackBar.open("Exception: NYI", 'Okay', { duration: 5000 });
   }
 
+  // Start the timer, according to the first player's time limit set in the store.
+  startTimer() {
+    this.timer.setClock(this.store.getTimeLimit());
+    this.timer.timerCountdown();
+    this.timer.timerDone.subscribe(() => {
+      if (!this.submitted) {
+        if (this.answersAllGiven()) {
+          this.submitMadLib();
+        } else {
+          let allCategories: any[] = []
+          for (let index = 0; index < this.madLibData.length; index ++) {
+            allCategories.push({
+              key: this.madLibData[index].key,
+              category: this.madLibData[index].category,
+              mldi: index
+            });
+          }
+          for (let index = 0; index < allCategories.length; index ++) {
+            let result = this.madLibChoices[allCategories[index].category];
+            if (result !== undefined) {
+              let iResult = result.find((key: any) => {
+                return key.category == allCategories[index].key;
+              });
+              if (iResult !== undefined) {
+                allCategories.splice(index, 1);
+                index--;
+              }
+            }
+          };
+          
+          allCategories.forEach((categoryKey) => {
+             let randomNumber = Math.ceil(Math.random() * 4);
+            switch(randomNumber){
+              case 1:
+                this.addChoice(
+                  this.madLibData[categoryKey.mldi], 
+                  categoryKey.key,
+                  this.madLibData[categoryKey.mldi].word1
+                );
+              break;
+              case 2:
+                this.addChoice(
+                  this.madLibData[categoryKey.mldi], 
+                  categoryKey.key,
+                  this.madLibData[categoryKey.mldi].word2
+                );
+              break;
+              case 3:
+                this.addChoice(
+                  this.madLibData[categoryKey.mldi], 
+                  categoryKey.key,
+                  this.madLibData[categoryKey.mldi].word3
+                );
+              break;
+              case 4:
+                this.addChoice(
+                  this.madLibData[categoryKey.mldi], 
+                  categoryKey.key,
+                  this.madLibData[categoryKey.mldi].word4
+                );
+              break;
+              default:
+                // This is literally unreachable.
+              break;
+            }
+          });
+  
+          this.submitMadLib(false);
+        }
+      }
+    });
+  }
+
   // Create and submit the finished Mad Lib.
   async submitMadLib(voteable: boolean = true) {
     // If the amount of answers given does not equal one less than the parts to be replaced,
@@ -553,6 +594,7 @@ export class GameComponent {
 
       this.store.setVotingState(votingStateObject);
       dialogRef.close();
+      clearInterval(this.refreshPlayerInterval);
       this.router.navigate([ "vote" ]);
     }
   }
