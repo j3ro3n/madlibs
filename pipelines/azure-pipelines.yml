@@ -6,6 +6,12 @@
 trigger:
 - master
 
+variables:
+  azureSubscription: '9091064d-a9e6-4604-aa2d-a8020a6d5bf4'
+  webAppName: 'madderlibs-dev'
+  environmentName: 'madderlibs-dev'
+  vmImageName: 'ubuntu-latest'
+
 stages:
 - stage: Build
   displayName: Build stage
@@ -13,7 +19,7 @@ stages:
   - job: Build
     displayName: Build
     pool:
-      vmImage: ubuntu-latest
+      vmImage: $(vmImageName)
 
     steps:
     - task: NodeTool@0
@@ -26,6 +32,66 @@ stages:
         npm install
         ng build
       displayName: 'npm install and build'
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive files'
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
+
+    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      artifact: drop
+
+- stage: DeployDEV
+  displayName: Deploy to Dev
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy to Azure Web App
+    environment: $(environmentName)
+    pool:
+      vmImage: $(vmImageName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            displayName: 'Azure Web App Deploy: madderlibs-dev'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              appType: webAppLinux
+              appName: $(webAppName)
+              runtimeStack: 'NODE|10.10'
+              package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+              startUpCommand: 'npm run start'
+
+
+- stage: DeployPRD
+  displayName: Deploy to PRD
+  dependsOn: DeployDEV
+  condition: succeeded()
+  jobs:
+  - job: Deploy
+    displayName: Deploy to Static Web App
+    pool:
+      vmImage: $(vmImageName)
+
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm install -g @angular/cli
+        npm install
+        ng build
+      displayName: 'npm install and build'
+      
     - task: AzureStaticWebApp@0
       inputs:
           app_location: "/" 
