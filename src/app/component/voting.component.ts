@@ -2,11 +2,9 @@ import { Component } from '@angular/core';
 import { StoreService } from '../service/localStore.services';
 import { Router } from '@angular/router';
 import { ApiService } from '../service/api.services';
-import { WaitingDialog } from './waitingdialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TimerService } from '../service/timer.services';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { throwToolbarMixedModesError } from '@angular/material/toolbar';
 
 export interface VoteDataObject {
   player: string,
@@ -54,8 +52,8 @@ export class VoteComponent {
         // Get data for display:
         this.footer_message = this.store.MAD_LIBS_FOOTER;
 
-        let elligibleVotes = this.votingData.filter((property) => {
-            return property.disabled == "false";
+        let elligibleVotes = this.votingData.filter((item) => {
+            return item.disabled == "false";
         }).length > 0;
         if (!elligibleVotes) {
             this.nullVote();
@@ -66,7 +64,7 @@ export class VoteComponent {
             this.timer.timerDone.subscribe(() => {
                 this.onVote({
                     disabled: "true",
-                    id: "null",
+                    id: this.store.getPlayerId(),
                     madlib: "",
                     name: "",
                     player: "",
@@ -178,14 +176,12 @@ export class VoteComponent {
     // Vote for yourself, since there were no viable other options.
     nullVote() {
         this.optionWinner = 10;
-        this.onVote({
-            disabled: "true",
-            id: this.store.getPlayerId(),
-            madlib: "",
-            name: this.store.getPlayerName(),
-            player: "player1",
-            uiid: 0
-        });
+        
+        let playerContext = this.votingData.filter((item) => {
+            return item.id == this.store.getPlayerId();
+        })[0];
+        
+        this.onVote(playerContext);
     }
 
     // When the next button is pressed, the game should put in a request for the sessions mad lib.
