@@ -22,12 +22,17 @@ export class ApiService {
   async post(requestJson : any, endpoint : string) {
     return new Promise<object>((resolve, reject) => {
       let params = new HttpHeaders().set('requestJson', JSON.stringify(requestJson));
-      this.http.get( this.CONNECTOR + endpoint, 
-      {
-        headers: params
-      }).subscribe((result) => {
+      
+      this.http.post( this.CONNECTOR + endpoint, requestJson).subscribe((result) => {
         resolve(result);
       });
+      
+      // this.http.get( this.CONNECTOR + endpoint, 
+      // {
+      //   headers: params
+      // }).subscribe((result) => {
+      //   resolve(result);
+      // });
     });
   }
 }
