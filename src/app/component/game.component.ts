@@ -586,6 +586,18 @@ export class GameComponent {
       let finishedMadLib = "";
       substitute_words.forEach((partial) => {
         let firstWord = partial.substring(0, partial.indexOf(' '));
+        if (firstWord.indexOf(',') > 0) {
+          firstWord = firstWord.substring(0, firstWord.indexOf(','));
+        }
+        if (firstWord.indexOf('.') > 0) {
+          firstWord = firstWord.substring(0, firstWord.indexOf('.'));
+        }
+        if (firstWord.indexOf('!') > 0) {
+          firstWord = firstWord.substring(0, firstWord.indexOf('!'));
+        }
+        if (firstWord.indexOf('?') > 0) {
+          firstWord = firstWord.substring(0, firstWord.indexOf('?'));
+        }
         if (firstWord == '') {
           firstWord = partial.substring(0, partial.length-1);
         }
