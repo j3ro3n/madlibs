@@ -261,6 +261,10 @@ export class VoteComponent {
     // Found this option to shuffle an array on StackOverflow, works like a charm!
     // https://stackoverflow.com/questions/60787865/randomize-array-in-angular
     shuffleAnswers(answers : VoteDataObject[]) {
+        answers = answers.filter((item) => {
+            return !(item.name == null)
+        });
+        
         var m = answers.length, t, i;
 
         while (m) {    
