@@ -38,7 +38,7 @@
             <!-- Actual game component. -->
             <div class="col-sm-12 col-md-12 col-lg-1 col-xl-1">
                 <!-- Loop through all players and print their names and scores. -->
-                <div *ngFor="let key of gameDataKeys" class="pt-2"><p><span matBadge="{{gameData[key.score] || ''}}" matBadgePosition="before" matBadgeOverlap="false">{{gameData[key.name] || ''}}</span></p></div>
+                <div *ngFor="let key of gameDataKeys" class="pt-2"><p><span matBadge="{{gameData[key.score] || ''}}" matBadgePosition="before" matBadgeOverlap="false">{{gameData[key.name]}}<span *ngIf="gameData[key.inactive] == 'true'">&nbsp;<span class="material-icons" style="color:chocolate;">link_off</span></span></span></p></div>
             </div>
             <div class="col-sm-12 col-md-12 col-lg-10 col-xl-10">
                 <!-- Loop through all the mad lib options and display them on screen. -->
