@@ -49,9 +49,6 @@ export class VoteComponent {
         // Hard Reset this, just to be safe.
         this.optionSelected = -1;
         this.optionWinner = -1;
-        
-        console.log(this.votingData);
-        console.log(store.getVotingState());
     }
 
     // Event: onInit append. Do last minute updates to UI elements, store what is needed and display.
