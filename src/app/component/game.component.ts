@@ -97,17 +97,27 @@ export class GameComponent {
 
     // Get the current Mad lib and store it.
     let sessionID = this.gameData.sessieid;
-    try {
-      // Get the current Mad Lib from the server.
-      await this.api.post({
-        sessieid: sessionID,
-        playerid: this.store.getPlayerId(),
-        request: "mad lib"
-      }, "madlib").then((result) => {
-        this.store.setGameMadLib(result);
-      });
-    } catch(exception) {
-      this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+    let madLibResponse: any = {
+      error: "vote-in-progress-error"
+    };
+    while ((madLibResponse.error !== undefined) 
+    && (madLibResponse.error == "vote-in-progress-error")) {
+      try {
+        // Get the current Mad Lib from the server.
+        await this.api.post({
+          sessieid: sessionID,
+          playerid: this.store.getPlayerId(),
+          request: "mad lib"
+        }, "madlib").then((result) => {
+          this.store.setGameMadLib(result);
+          madLibResponse = result;
+        });
+      } catch(exception) {
+        this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
+      }
+      
+      // Wait for one second between requests.
+      await new Promise(f => setTimeout(f, 1000));
     }
     this.convertMadLibJSONtoUIObjects(this.store.getGameMadLib());
 

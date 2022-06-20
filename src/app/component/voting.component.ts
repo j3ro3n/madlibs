@@ -27,8 +27,8 @@ export class VoteComponent {
     votingData : VoteDataObject[];
 
     sessionID : string = "";
-    optionSelected : number = -1;
-    optionWinner : number = -1;
+    optionSelected : number;
+    optionWinner : number;
     footer_message : string = "";
 
     // Constructor
@@ -45,6 +45,13 @@ export class VoteComponent {
             this.quit();
         }
         this.votingData = this.convertVotingJSONtoUIObjects(store.getVotingState());
+
+        // Hard Reset this, just to be safe.
+        this.optionSelected = -1;
+        this.optionWinner = -1;
+        
+        console.log(this.votingData);
+        console.log(store.getVotingState());
     }
 
     // Event: onInit append. Do last minute updates to UI elements, store what is needed and display.
@@ -223,7 +230,8 @@ export class VoteComponent {
         let votingResultStateObject: any = {
             error: "awaiting-votes-error"
         };
-        while (votingResultStateObject.error !== undefined) {
+        while ((votingResultStateObject.error !== undefined) 
+            && (votingResultStateObject.error == "awaiting-votes-error")) {
             // Wait for one second between requests.
             await new Promise(f => setTimeout(f, 1000));
             
