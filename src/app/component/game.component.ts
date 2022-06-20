@@ -101,7 +101,7 @@ export class GameComponent {
       error: "vote-in-progress-error"
     };
     while ((madLibResponse.error !== undefined) 
-    && (madLibResponse.error == "vote-in-progress-error")) {
+      && (madLibResponse.error == "vote-in-progress-error")) {
       try {
         // Get the current Mad Lib from the server.
         await this.api.post({
@@ -116,7 +116,7 @@ export class GameComponent {
         this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
       }
       
-      // Wait for one second between requests.
+      // Wait for one second after each request to prevent flooding the server.
       await new Promise(f => setTimeout(f, 1000));
     }
     this.convertMadLibJSONtoUIObjects(this.store.getGameMadLib());
@@ -635,10 +635,8 @@ export class GameComponent {
       let votingStateObject = {
         error: "awaiting-submissions-error"
       };
-      while (votingStateObject.error !== undefined) {
-        // Wait for one second between requests.
-        await new Promise(f => setTimeout(f, 1000));
-        
+      while ((votingStateObject.error !== undefined)
+        && (votingStateObject.error == "awaiting-submissions-error")) {
         try {
           // Request the voting state.
           await this.api.post({
@@ -653,6 +651,9 @@ export class GameComponent {
         } catch(exception) {
           this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
         }
+
+        // Wait for one second after each request to prevent flooding the server.
+        await new Promise(f => setTimeout(f, 1000));
       }
 
       this.store.setVotingState(votingStateObject);

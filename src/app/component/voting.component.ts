@@ -229,9 +229,6 @@ export class VoteComponent {
         };
         while ((votingResultStateObject.error !== undefined) 
             && (votingResultStateObject.error == "awaiting-votes-error")) {
-            // Wait for one second between requests.
-            await new Promise(f => setTimeout(f, 1000));
-            
             try {
                 // Submit the vote. The backend knows only to process it once.
                 await this.api.post({
@@ -244,6 +241,9 @@ export class VoteComponent {
             } catch(exception) {
                 this.snackBar.open("" + exception, 'Sorry', { duration: 5000 });
             }
+
+            // Wait for one second after each request to prevent flooding the server.
+            await new Promise(f => setTimeout(f, 1000));
         }
         
         let winnerContext = this.votingData.find((voter) => {
