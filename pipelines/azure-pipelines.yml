@@ -67,7 +67,7 @@ stages:
               appName: $(webAppName)
               runtimeStack: 'NODE|18.0'
               package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-              startUpCommand: 'npm run start'
+              startUpCommand: 'nohup node backend/server.js & ng serve'
 
 
 - stage: DeployPRD
