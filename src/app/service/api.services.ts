@@ -9,7 +9,7 @@ export class ApiService {
   // The url at which the API is listening.
   readonly CONNECTOR = isDevMode() ? 
     'http://localhost:1234/': 
-    "https://madderlibs.koreacentral.azurecontainer.io/MadderLibsAPI/";
+    "https://madderlibs.azurewebsites.net/MadderLibsAPI/";
   
   // Constructor
   constructor(private http: HttpClient) { }
