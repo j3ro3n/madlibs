@@ -1,5 +1,5 @@
 import { Injectable, isDevMode } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 /*
   Service to communicate with to reach the API backend.
@@ -7,9 +7,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 @Injectable()
 export class ApiService {
   // The url at which the API is listening.
-  readonly CONNECTOR = isDevMode() ? 
-    'http://localhost:1234/': 
-    "https://madderlibs.azurewebsites.net/MadderLibsAPI/";
+  readonly CONNECTOR = isDevMode() 
+    ? 'http://localhost:1234/'
+    : "https://madderlibs.azurewebsites.net/MadderLibsAPI/";
   
   // Constructor
   constructor(private http: HttpClient) { }
@@ -21,18 +21,14 @@ export class ApiService {
   */
   async post(requestJson : any, endpoint : string) {
     return new Promise<object>((resolve, reject) => {
-      let params = new HttpHeaders().set('requestJson', JSON.stringify(requestJson));
-      
-      this.http.post( this.CONNECTOR + endpoint, requestJson).subscribe((result) => {
-        resolve(result);
-      });
-      
-      // this.http.get( this.CONNECTOR + endpoint, 
-      // {
-      //   headers: params
-      // }).subscribe((result) => {
-      //   resolve(result);
-      // });
+      // TODO: Try catch.
+      this.http.post( 
+        this.CONNECTOR + endpoint, 
+        requestJson)
+        .subscribe((result) => {
+          resolve(result);
+        }
+      );
     });
   }
 }

@@ -77,6 +77,9 @@ export class GameComponent {
     // Re-initialize the cost number for shuffling at the start of each round.
     // (ie. every time this component is constructed)
     this.shuffleCost = -1;
+
+    // Set the playerId. It is needed early on.
+    this.store.setPlayerId(this.gameData[this.gameData.length-1].id);
   }
 
   // Event: onInit append. Do last minute updates to UI elements, store what is needed and display.
@@ -220,9 +223,6 @@ export class GameComponent {
           });
       }
     });
-
-    // Save the player's Id.
-    this.store.setPlayerId(this.gameData[this.gameDataKeys[this.gameDataKeys.length-1].id]);
   }
 
   // Convert the original Mad Lib json into a word list useable by the html.

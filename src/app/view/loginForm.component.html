@@ -12,7 +12,7 @@
     <form [formGroup]="loginForm">
         <mat-card-content>
             <p>
-                <mat-form-field hintLabel="Max 15 characters" appearance="fill" class="loginInput">
+                <mat-form-field hintLabel="* Max 15 characters" appearance="fill" class="loginInput">
                     <mat-label>Enter a nickname you are known by</mat-label>
                     <input matInput #input maxlength="15" placeholder="Ex. Postman Pat" formControlName="nickname">
                     <mat-hint align="end">{{input.value?.length || 0}}/15</mat-hint>
