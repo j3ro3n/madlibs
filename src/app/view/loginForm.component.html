@@ -2,7 +2,10 @@
 <mat-card>
     <mat-card-title>The story begins...</mat-card-title>
     <mat-card-subtitle style="text-align:end">
-        <button mat-mini-fab color="accent" (click)="openTimerDialog()">
+        <!-- Profanity filter currently is not alive in the Backend. Remove disabled when done. -->
+        <button mat-mini-fab disabled color="{{profanity_filter_mode_color}}" (click)="switchProfanityMode()" title="Coming eventually: Profanity Filter!">
+            <span class="material-icons">{{profanity_filter_button_text}}</span>
+        </button>&nbsp;<button mat-mini-fab color="{{timer_mode_color}}" (click)="openTimerDialog()">
             <span class="material-icons">timer</span>
         </button>
     </mat-card-subtitle>
@@ -26,6 +29,8 @@
         <mat-card-actions>
             <button mat-raised-button color="primary" id="startButton" [disabled]="!loginForm.valid" (click)="onPlay()">Let's get started</button>
         </mat-card-actions>
+        <span *ngIf="timer_mode_active"><p>You have chosen a timer of {{this.store.getTimeLimit()}} seconds. If you are the first player in the session, that's what we'll set your timer for!</p></span>
+        <span *ngIf="profanity_filter_mode_active"><p>You've switched on the profanity filter. We'll try to get rid of most of the vile words for you!</p></span>
     </form>
     <mat-card-footer>
         <sub>{{footer_message}}</sub>
