@@ -18,12 +18,19 @@ export class LoginFormComponent {
   // Local properties for binding to the template.
   loginForm: FormGroup;
   footer_message: string;
+
+  timer_mode_active: boolean = false;
+  timer_mode_color: string = "accent";
+
+  profanity_filter_mode_active: boolean = false;
+  profanity_filter_mode_color: string = "accent";
+  profanity_filter_button_text: string = "face_6";
   
   // Constructor
   constructor( 
       private api: ApiService,
       public dialog: MatDialog,
-      private store: StoreService,
+      protected store: StoreService,
       private router: Router,
       private snackBar: MatSnackBar
     ) {
@@ -57,6 +64,7 @@ export class LoginFormComponent {
         let transmitForm = this.loginForm.value;
         transmitForm["playerid"] = "";
         transmitForm["sessieTimer"] = this.store.getTimeLimit();
+        transmitForm["profanityFilter"] = this.profanity_filter_mode_active;
         await this.api.post(transmitForm, "gamestate").then((result) => {
           this.store.setGameState(result);
         });
@@ -82,6 +90,25 @@ export class LoginFormComponent {
       if (result !== undefined) {
         this.store.setTimeLimit(result);
       }
+
+      if (this.store.getTimeLimit() == 0) {
+        this.timer_mode_active = false;
+        this.timer_mode_color = "accent";
+      } else {
+        this.timer_mode_active = true;
+        this.timer_mode_color = "primary";
+      }
     });
+  }
+
+  /*
+    Switch on or off the profanity filter
+  */
+  switchProfanityMode() {
+    this.profanity_filter_mode_active = !this.profanity_filter_mode_active;
+    this.profanity_filter_mode_color = this.profanity_filter_mode_active ? "primary" : "accent";
+    this.profanity_filter_button_text = this.profanity_filter_mode_active 
+      ? "child_care" 
+      : "face_6";
   }
 }

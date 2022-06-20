@@ -199,33 +199,29 @@ export class GameComponent {
 
     // Fill player list and score.
     let gameDataTemp = Object.keys(this.gameData).filter(prop => {
-      return prop !== "sessieid" 
-        && prop.indexOf("score") < 0 
-        && prop.indexOf("_id") < 0
-        && prop !== "sessieTimer"
+      return prop.indexOf("name") > 0 
     });
     
     gameDataTemp.forEach(item => {
-      let name = item.indexOf("_name") > 0 
-        ? item.substring(0, item.length-5).concat("_name") 
-        : item;
-      let score = item.indexOf("_name") > 0
-        ? item.substring(0, item.length-5).concat("_score")
-        : item.concat("_score");
-      let id = item.indexOf("_name") > 0
-        ? item.substring(0, item.length-5).concat("_id")
-        : item.concat("_id");
+      // Create keys for querying later:
+      let name = item.substring(0, item.length-5).concat("_name");
+      let score = item.substring(0, item.length-5).concat("_score");
+      let id = item.substring(0, item.length-5).concat("_id");
+      let inactive = item.substring(0, item.length-5).concat("_inactive");
       
+      // Add the keys to an internal key array:
       if (this.gameData[item] !== '') {
         this.gameDataKeys.push(
-          { 
+          {
             "name": name,
             "score": score,
-            "id": id
+            "id": id,
+            "inactive": inactive
           });
       }
     });
 
+    // Save the player's Id.
     this.store.setPlayerId(this.gameData[this.gameDataKeys[this.gameDataKeys.length-1].id]);
   }
 
