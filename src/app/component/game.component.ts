@@ -78,8 +78,12 @@ export class GameComponent {
     // (ie. every time this component is constructed)
     this.shuffleCost = -1;
 
-    // Set the playerId. It is needed early on.
-    this.store.setPlayerId(this.gameData[this.gameData.length-1].id);
+    // Get the last player to join the session. Save their id. Hope it's the last player. ¯\_(ツ)_/¯
+    let playerNumber = Object.keys(this.gameData).filter((item) => {
+      return this.gameData[item] !== null && item.indexOf("name") > 0
+    }).length;
+    let playerIdKey = "player_" + playerNumber + "_id";
+    this.store.setPlayerId(this.gameData[playerIdKey]);
   }
 
   // Event: onInit append. Do last minute updates to UI elements, store what is needed and display.
