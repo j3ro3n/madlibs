@@ -317,7 +317,6 @@ export class GameComponent {
         category: ucCategory,
         word: wordToReport
       }, "report").then((result: any) => {
-        console.log(result);
         newWords = [
           result.word_1,
           result.word_2,
