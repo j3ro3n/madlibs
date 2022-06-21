@@ -21,14 +21,17 @@ export class ApiService {
   */
   async post(requestJson : any, endpoint : string) {
     return new Promise<object>((resolve, reject) => {
-      // TODO: Try catch.
-      this.http.post( 
-        this.CONNECTOR + endpoint, 
-        requestJson)
-        .subscribe((result) => {
-          resolve(result);
-        }
-      );
+      try {
+        this.http.post( 
+          this.CONNECTOR + endpoint, 
+          requestJson)
+          .subscribe((result) => {
+            resolve(result);
+          }
+        );
+      } catch (exception) {
+        throw exception;
+      }
     });
   }
 }

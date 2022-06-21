@@ -41,6 +41,7 @@
                 <div *ngFor="let key of gameDataKeys" class="pt-2"><p><span matBadge="{{gameData[key.score] || ''}}" matBadgePosition="before" matBadgeOverlap="false">{{gameData[key.name]}}<span *ngIf="gameData[key.inactive] == 'true'">&nbsp;<span class="material-icons" style="color:chocolate;">link_off</span></span></span></p></div>
             </div>
             <div class="col-sm-12 col-md-12 col-lg-10 col-xl-10">
+                <span *ngIf="madLibData.length == 0">Nothing to see here yet! Don't worry, people are still voting.</span>
                 <!-- Loop through all the mad lib options and display them on screen. -->
                 <div class="row" *ngFor="let key of madLibData; index as i">
                     <div class="col-sm-12 col-md-12 col-lg-2 col-xl-2 pt-2 pb-1"><mat-chip-list><mat-chip class="w-100" selected color="{{shuffleColor}}" (click)="refreshCategory(madLibData[i].key)">{{madLibData[i].key |titlecase}}</mat-chip></mat-chip-list></div>

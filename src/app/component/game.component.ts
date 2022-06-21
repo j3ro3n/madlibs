@@ -622,11 +622,10 @@ export class GameComponent {
         }
       });
 
-      // Console log the resulting mad lib.
       const dialogRef = this.waitingDialog.open(WaitingDialog, {
         width: '250px',
         data: {
-          reason: "other players",
+          reason: "Waiting for other players",
           timer: this.timer
         }
       });
